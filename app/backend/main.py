@@ -36,8 +36,8 @@ if settings.ALL_CORS_ORIGINS:
     )
 
 app.include_router(api_router, prefix=API_V1_STR)
-app.mount(
-    "/static",
-    StaticFiles(directory=str(Path(__file__).parent / "static")),
-    name="static",
-)
+#app.mount(
+#    "/static",
+#    StaticFiles(directory=str(Path(__file__).parent / "static")),
+#    name="static",
+#)
