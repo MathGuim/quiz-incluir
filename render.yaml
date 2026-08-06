@@ -18,9 +18,9 @@ services:
     startCommand: |
       export PATH="$HOME/.local/bin:$PATH"
       uv run uvicorn main:app --host 0.0.0.0 --port $PORT
-    preDeployCommand: |
-      export PATH="$HOME/.local/bin:$PATH"
-      uv run python seed.py
+    #preDeployCommand: |
+    #  export PATH="$HOME/.local/bin:$PATH"
+    #  uv run python seed.py
     healthCheckPath: /api/v1/quizzes
     autoDeploy: true
     envVars:
