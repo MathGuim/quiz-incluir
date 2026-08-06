@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: streamlit-app
+    runtime: python
+    plan: free
+    buildCommand: |
+      curl -LsSf https://astral.sh/uv/install.sh | sh
+      export PATH="$HOME/.local/bin:$PATH"
+      uv sync
+    startCommand: |
+      export PATH="$HOME/.local/bin:$PATH"
+      mkdir -p src/.streamlit
+      cp /etc/secrets/secrets.toml src/.streamlit/secrets.toml
+      uv run streamlit run src/app_v2.py \
+        --server.port=$PORT \
+        --server.address=0.0.0.0 \
+        --server.headless=true
+    healthCheckPath: /
+    autoDeploy: true

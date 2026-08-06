@@ -1,0 +1,153 @@
+[
+  {
+    "type": "multiple_choice",
+    "level": "C1",
+    "prompt": "According to the text, what is the primary danger of ignoring cultural norms in international business communication?",
+    "correct": 2,
+    "choices": [
+      "It leads to a total decline in the use of English as a lingua franca.",
+      "It results in the inability to conduct business across borders.",
+      "It can lead to unfair judgements and communication breakdowns.",
+      "It makes the use of professional titles obsolete."
+    ],
+    "explanations": [
+      "Incorrect. The text says English is shared, but nuances differ.",
+      "Incorrect. Business is still conducted, but it may be plagued by misunderstandings.",
+      "Good Job!",
+      "Incorrect. Professional titles are a point of difference, not the result of the danger."
+    ],
+    "suggested_score": 3.5
+  },
+  {
+    "type": "true_false",
+    "level": "C1",
+    "prompt": "The author suggests that the most effective way to determine how to address a business partner is to strictly follow the cultural stereotypes of their home country.",
+    "correct": false,
+    "suggested_score": 2.0
+  },
+  {
+    "type": "multiple_selection",
+    "level": "C1",
+    "prompt": "In which of the following countries or regions might a smile be perceived negatively (e.g., as a sign of idiocy, dishonesty, or lower intelligence)?",
+    "correct": [
+      0,
+      2,
+      3
+    ],
+    "choices": [
+      "Russia",
+      "United States",
+      "Japan",
+      "India"
+    ],
+    "explanations": [
+      "Good Job!",
+      "Incorrect. In the US, smiling is seen as a sign of openness and friendship.",
+      "Good Job!",
+      "Good Job!"
+    ],
+    "suggested_score": 4.0
+  },
+  {
+    "type": "short_text",
+    "level": "C1",
+    "prompt": "The text mentions that using a PhD title on a business card was viewed as 'disgustingly _____' by the British trainee.",
+    "correct": "pompous",
+    "suggested_score": 2.0
+  },
+  {
+    "type": "multiple_choice",
+    "level": "C1",
+    "prompt": "What does the author mean by suggesting that cultural knowledge should be kept 'at the back of our minds'?",
+    "correct": 1,
+    "choices": [
+      "We should ignore cultural differences entirely to avoid offense.",
+      "We should use cultural knowledge as a guide but avoid using it to stereotype individuals.",
+      "We should memorize every cultural norm to ensure perfect communication.",
+      "We should only care about cultural differences when working in the Middle East."
+    ],
+    "explanations": [
+      "Incorrect. The author says awareness helps avoid miscommunication.",
+      "Good Job!",
+      "Incorrect. The author warns against 'pigeonholing' people.",
+      "Incorrect. This is too narrow a scope."
+    ],
+    "suggested_score": 4.5
+  },
+  {
+    "type": "multiple_selection",
+    "level": "C1",
+    "prompt": "According to the text, which factors\u2014besides national culture\u2014influence an individual's behavior and thinking?",
+    "correct": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "choices": [
+      "Corporate culture",
+      "Age and gender",
+      "Individual experiences",
+      "Regional background"
+    ],
+    "explanations": [
+      "Good Job!",
+      "Good Job!",
+      "Good Job!",
+      "Good Job!"
+    ],
+    "suggested_score": 4.0
+  },
+  {
+    "type": "true_false",
+    "level": "C1",
+    "prompt": "In the Middle East, direct eye contact between members of the same gender is generally considered inappropriate.",
+    "correct": false,
+    "suggested_score": 2.0
+  },
+  {
+    "type": "multiple_choice",
+    "level": "C1",
+    "prompt": "How is eye contact interpreted in parts of South America and Africa, according to the passage?",
+    "correct": 3,
+    "choices": [
+      "As a sign of extreme honesty.",
+      "As a way to break the ice.",
+      "As a requirement for professional respect.",
+      "As a potential challenge to authority."
+    ],
+    "explanations": [
+      "Incorrect. This is not mentioned for these regions.",
+      "Incorrect. Smiling is used to break the ice, not eye contact.",
+      "Incorrect. The text suggests it might be seen as disrespectful or challenging.",
+      "Good Job!"
+    ],
+    "suggested_score": 3.0
+  },
+  {
+    "type": "short_text",
+    "level": "C1",
+    "prompt": "The text uses the verb '_____' to describe the act of unfairly categorizing an individual based on their nationality.",
+    "correct": "pigeonhole",
+    "suggested_score": 3.0
+  },
+  {
+    "type": "multiple_choice",
+    "level": "C1",
+    "prompt": "Which of the following best describes the contrast between the British and German trainees' perspectives on titles?",
+    "correct": 0,
+    "choices": [
+      "One viewed the title as a sign of arrogance, while the other viewed it as a hard-earned right.",
+      "One believed titles were unnecessary in business, while the other believed they were mandatory for all.",
+      "The British trainee supported the use of PhD titles, while the German trainee found them pompous.",
+      "Both agreed that titles should be used, but differed on where to place them on the card."
+    ],
+    "explanations": [
+      "Good Job!",
+      "Incorrect. The German trainee specifically defended the right to the title based on education.",
+      "Incorrect. This reverses the roles of the two trainees.",
+      "Incorrect. They were in a 'hot debate' and did not agree."
+    ],
+    "suggested_score": 3.0
+  }
+]
