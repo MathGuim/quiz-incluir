@@ -7,6 +7,7 @@ from models import (
     QuestionType,
     Quiz,
     QuizAttempt,
+    QuizCategory,
     QuizQuestion,
     User,
 )
@@ -22,4 +23,5 @@ __all__ = [
     "QuestionType",
     "MediaType",
     "LanguageLevel",
+    "QuizCategory",
 ]

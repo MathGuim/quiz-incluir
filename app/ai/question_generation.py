@@ -1,8 +1,9 @@
 import instructor
 
 from enum import Enum
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, BeforeValidator
 from typing import Annotated, Literal
+from instructor import llm_validator
 
 
 class LanguageLevel(str, Enum):
@@ -14,18 +15,7 @@ class LanguageLevel(str, Enum):
     C2 = "C2"
 
 
-class MultipleChoiceQuestion(BaseModel):
-    "Return the multiple choice question according to the schema below"
-    type: Literal["multiple_choice"] = "multiple_choice"
-    level: LanguageLevel
-    prompt: Annotated[str, "Question prompt."]
-    correct: int = Field(description="Position of the correct answer among the choices below (starting from zero).", ge=0, le=3)
-    choices: list[str] = Field(description="List of alternatives", min_length=4, max_length=4)
-    explanations: list[str] = Field(
-        description="If the alternative is wrong, explain why it is wrong. Otherwise return 'Good Job!'",
-        min_length=4, max_length=4
-    )
-    suggested_score: float = Field(description="How many points (out of 10) should this question be worth", gt=0, lt=5)
+
 
 
 class MultipleSelectionQuestion(BaseModel):
@@ -88,9 +78,7 @@ def generate_questions(level) -> list[
     | MultipleSelectionQuestion
     | ShortTextQuestion
 ]:
-    client = instructor.from_provider(
-        "ollama/gemma4:cloud", mode=instructor.Mode.JSON
-    )
+
     return client.create(
         response_model=list[
             MultipleChoiceQuestion
@@ -112,6 +100,58 @@ def generate_questions(level) -> list[
 if __name__ == "__main__":
     import json
     from pathlib import Path
+
+    #text = "According to the devil the meaning of live is to live a life of sin and debauchery."
+
+    n_questions = 1
+
+    MODEL = "ollama/gemma4:cloud"
+
+    client = instructor.from_provider(MODEL, mode=instructor.Mode.JSON)
+
+    class MultipleChoiceQuestion(BaseModel):
+        "Return the multiple choice question according to the schema below"
+        type: Literal["multiple_choice"] = "multiple_choice"
+        level: LanguageLevel
+
+        prompt: str= Field(description="Question prompt.")
+
+        correct: int = Field(description="Position of the correct answer among the choices below (starting from zero).", ge=0, le=3)
+
+        choices: list[str] = Field(description="List of alternatives", min_length=4, max_length=4)
+
+        explanations: list[str] = Field(
+            description="If the alternative is wrong, explain why it is wrong. Otherwise return 'Good Job!'",
+            min_length=4, max_length=4
+        )
+        suggested_score: float = Field(description="How many points (out of 10) should this question be worth", gt=0, lt=5)
+
+    try:
+        q = client.create(
+            response_model=list[
+                MultipleChoiceQuestion
+            ],
+            messages=[
+            {
+                "role": "system",
+                "content": f"""
+                    You're an english language learning assistant hired to generate {level} level questions for a quiz based on the text bellow.
+
+                    ## Rules for question generation
+
+                    + Avoid questions that repeat ipsis litteris what it's on the text.
+                    + Don't say objectionable things.
+                    + Generate a diverse ensemble of at least {n_questions} questions.
+                """
+
+            },
+            {   
+                "role": "user",
+                "content": f"<text> {text} </text>"
+            }
+        ])
+    except Exception as e:
+        print(e)
 
     level = "C1"
 

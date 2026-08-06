@@ -1,19 +1,60 @@
+databases:
+  - name: quiz-db
+    plan: free
+    databaseName: quiz
+    user: quiz
+
 services:
   - type: web
-    name: streamlit-app
+    name: quiz-backend
     runtime: python
+    rootDir: app/backend
     plan: free
     buildCommand: |
       curl -LsSf https://astral.sh/uv/install.sh | sh
       export PATH="$HOME/.local/bin:$PATH"
+      cd ../..
       uv sync
     startCommand: |
       export PATH="$HOME/.local/bin:$PATH"
-      mkdir -p src/.streamlit
-      cp /etc/secrets/secrets.toml src/.streamlit/secrets.toml
-      uv run streamlit run src/app_v2.py \
-        --server.port=$PORT \
-        --server.address=0.0.0.0 \
-        --server.headless=true
+      uv run uvicorn main:app --host 0.0.0.0 --port $PORT
+    preDeployCommand: |
+      export PATH="$HOME/.local/bin:$PATH"
+      uv run python seed.py
+    healthCheckPath: /api/v1/quizzes
+    autoDeploy: true
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: quiz-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: FRONTEND_URL
+        fromService:
+          name: quiz-frontend
+          type: web
+          envVarKey: RENDER_EXTERNAL_URL
+
+  - type: web
+    name: quiz-frontend
+    runtime: python
+    rootDir: app/frontend
+    plan: free
+    buildCommand: |
+      curl -LsSf https://astral.sh/uv/install.sh | sh
+      export PATH="$HOME/.local/bin:$PATH"
+      cd ../..
+      uv sync
+    startCommand: |
+      export PATH="$HOME/.local/bin:$PATH"
+      cd ../..
+      uv run flet run app/frontend/main.py --web --host 0.0.0.0 --port $PORT
     healthCheckPath: /
     autoDeploy: true
+    envVars:
+      - key: QUIZ_API_URL
+        fromService:
+          name: quiz-backend
+          type: web
+          envVarKey: RENDER_EXTERNAL_URL

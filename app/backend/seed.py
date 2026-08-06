@@ -22,6 +22,7 @@ from models import (
     QuestionType,
     Quiz,
     QuizAttempt,
+    QuizCategory,
     QuizQuestion,
     User,
 )
@@ -58,35 +59,30 @@ async def seed() -> None:
 
         questions = [
             Question(
-                level=LanguageLevel.A1,
                 type=QuestionType.MULTIPLE_CHOICE,
                 prompt="Which word is a fruit?",
                 suggested_score=1.0,
                 config={"options": ["apple", "table", "chair", "book"], "correct_index": 0},
             ),
             Question(
-                level=LanguageLevel.A1,
                 type=QuestionType.MULTIPLE_CHOICE,
                 prompt="What is the opposite of 'hot'?",
                 suggested_score=1.0,
                 config={"options": ["cold", "warm", "boiling", "sunny"], "correct_index": 0},
             ),
             Question(
-                level=LanguageLevel.A1,
                 type=QuestionType.TRUE_FALSE,
                 prompt="The sun rises in the east.",
                 suggested_score=1.0,
                 config={"answer": True},
             ),
             Question(
-                level=LanguageLevel.A1,
                 type=QuestionType.SHORT_TEXT,
                 prompt="Complete the sentence: I ____ a student.",
                 suggested_score=1.0,
                 config={"accepted_answers": ["am"]},
             ),
             Question(
-                level=LanguageLevel.A2,
                 type=QuestionType.MULTIPLE_SELECTION,
                 prompt="Which of these are animals?",
                 suggested_score=1.0,
@@ -96,35 +92,30 @@ async def seed() -> None:
                 },
             ),
             Question(
-                level=LanguageLevel.A2,
                 type=QuestionType.MULTIPLE_CHOICE,
                 prompt="Choose the correct past tense: 'I ____ to school yesterday.'",
                 suggested_score=1.0,
                 config={"options": ["go", "went", "gone", "going"], "correct_index": 1},
             ),
             Question(
-                level=LanguageLevel.B1,
                 type=QuestionType.TRUE_FALSE,
                 prompt="'Their' and 'they're' mean the same thing.",
                 suggested_score=1.0,
                 config={"answer": False},
             ),
             Question(
-                level=LanguageLevel.B1,
                 type=QuestionType.MULTIPLE_CHOICE,
                 prompt="Which word is a synonym of 'happy'?",
                 suggested_score=1.0,
                 config={"options": ["sad", "angry", "joyful", "tired"], "correct_index": 2},
             ),
             Question(
-                level=LanguageLevel.B2,
                 type=QuestionType.SHORT_TEXT,
                 prompt="Give the correct comparative form of 'good'.",
                 suggested_score=1.0,
                 config={"accepted_answers": ["better"]},
             ),
             Question(
-                level=LanguageLevel.C1,
                 type=QuestionType.MULTIPLE_SELECTION,
                 prompt="Which sentences are grammatically correct?",
                 suggested_score=1.0,
@@ -139,7 +130,6 @@ async def seed() -> None:
                 },
             ),
             Question(
-                level=LanguageLevel.C1,
                 type=QuestionType.MULTIPLE_CHOICE,
                 prompt="Select the most formal way to request assistance.",
                 suggested_score=1.0,
@@ -154,7 +144,6 @@ async def seed() -> None:
                 },
             ),
             Question(
-                level=LanguageLevel.C2,
                 type=QuestionType.MULTIPLE_CHOICE,
                 prompt="Choose the word that best fits: 'His ______ disregard for rules alarmed his colleagues.'",
                 suggested_score=1.0,
@@ -199,9 +188,24 @@ async def seed() -> None:
         session.add_all(media)
 
         quizzes = [
-            Quiz(title="Beginner Basics", description="A1 level essentials"),
-            Quiz(title="Intermediate Check", description="B1 grammar and vocabulary"),
-            Quiz(title="Advanced Mastery", description="C1-C2 challenge"),
+            Quiz(
+                title="Beginner Basics",
+                description="A1 level essentials",
+                category=QuizCategory.VOCABULARY,
+                level=LanguageLevel.A1,
+            ),
+            Quiz(
+                title="Intermediate Check",
+                description="B1 grammar and vocabulary",
+                category=QuizCategory.LISTENING,
+                level=LanguageLevel.B1,
+            ),
+            Quiz(
+                title="Advanced Mastery",
+                description="C1-C2 challenge",
+                category=QuizCategory.READING,
+                level=LanguageLevel.C1,
+            ),
         ]
         session.add_all(quizzes)
 

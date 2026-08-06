@@ -2,7 +2,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import List
 
-from pydantic import Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -21,6 +21,20 @@ class Settings(BaseSettings):
         default="sqlite+aiosqlite:///./quiz.db",
         description="Async database URL",
     )
+
+    @field_validator("DATABASE_URL")
+    @classmethod
+    def normalize_db_url(cls, v: str) -> str:
+        """Ensure SQLAlchemy async engines get an async driver for Postgres.
+
+        Render injects ``DATABASE_URL`` as ``postgresql://user:pass@host/db``
+        (sync scheme). Rewrite it to the asyncpg scheme the app uses.
+        """
+        if v.startswith("postgres://") or v.startswith("postgresql://"):
+            scheme = v.split("://", 1)[0]
+            if "+" not in scheme:
+                return "postgresql+asyncpg://" + v.split("://", 1)[1]
+        return v
 
     GOOGLE_CLIENT_ID: str = Field(default="", description="Google OAuth2 Client ID")
     GOOGLE_CLIENT_SECRET: str = Field(default="", description="Google OAuth2 Client Secret")

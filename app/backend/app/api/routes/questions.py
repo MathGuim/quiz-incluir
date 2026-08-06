@@ -22,7 +22,6 @@ async def _to_read(db: AsyncSession, question: Question) -> QuestionRead:
     media = [MediaRead.model_validate(m) for m in media_result.all()]
     return QuestionRead(
         id=question.id,
-        level=question.level,
         type=question.type,
         prompt=question.prompt,
         suggested_score=question.suggested_score,

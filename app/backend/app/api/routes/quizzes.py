@@ -26,6 +26,8 @@ async def _to_read(db: AsyncSession, quiz: Quiz) -> QuizRead:
         id=quiz.id,
         title=quiz.title,
         description=quiz.description,
+        category=quiz.category,
+        level=quiz.level,
         created_at=quiz.created_at,
         updated_at=quiz.updated_at,
         question_ids=question_ids,

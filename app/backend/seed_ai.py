@@ -106,7 +106,6 @@ async def seed() -> None:
 
         rows = [
             Question(
-                level=LanguageLevel(data["level"]),
                 type=QuestionType(data["type"]),
                 prompt=data["prompt"],
                 suggested_score=data["suggested_score"],
@@ -131,6 +130,7 @@ async def seed() -> None:
         quiz = Quiz(
             title="Business Etiquette (AI Generated)",
             description="C1 comprehension questions generated from the business etiquette text.",
+            level=LanguageLevel.C1,
         )
         session.add(quiz)
         await session.flush()
@@ -147,7 +147,7 @@ async def seed() -> None:
         await session.commit()
         print(
             f"Seeded: {len(rows)} questions in quiz '{quiz.title}' "
-            f"(level={rows[0].level.value if rows else '-'})"
+            f"(level={quiz.level.value})"
         )
 
 

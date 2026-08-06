@@ -9,4 +9,6 @@ class Quiz(BaseModel):
     id: str
     title: str
     description: str | None = None
+    category: str | None = None
+    level: str | None = None
     question_ids: list[str] = []

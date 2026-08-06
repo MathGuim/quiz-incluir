@@ -5,12 +5,11 @@ from uuid import UUID
 from pydantic import field_validator
 from sqlmodel import SQLModel
 
-from app.models import LanguageLevel, QuestionType
+from app.models import QuestionType
 from app.schemas.media import MediaRead
 
 
 class QuestionBase(SQLModel):
-    level: LanguageLevel
     type: QuestionType
     prompt: str
     suggested_score: float = 1.0
@@ -29,7 +28,6 @@ class QuestionCreate(QuestionBase):
 
 
 class QuestionUpdate(SQLModel):
-    level: LanguageLevel | None = None
     type: QuestionType | None = None
     prompt: str | None = None
     suggested_score: float | None = None

@@ -31,6 +31,12 @@ class LanguageLevel(str, Enum):
     C1 = "C1"
     C2 = "C2"
 
+
+class QuizCategory(str, Enum):
+    READING = "reading"
+    LISTENING = "listening"
+    VOCABULARY = "vocabulary"
+
 # -------------------------
 # Users
 # -------------------------
@@ -86,6 +92,9 @@ class Quiz(SQLModel, table=True):
     title: str
     description: str | None = None
 
+    category: QuizCategory = QuizCategory.READING
+    level: LanguageLevel = LanguageLevel.A1
+
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
@@ -105,8 +114,6 @@ class Question(SQLModel, table=True):
     __tablename__ = "questions"
 
     id: UUID = Field(default_factory=uuid4, primary_key=True)
-
-    level: LanguageLevel
 
     type: QuestionType
 
