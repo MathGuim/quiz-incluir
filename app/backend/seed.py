@@ -154,6 +154,7 @@ async def seed() -> None:
             ),
         ]
         session.add_all(questions)
+        await session.flush()
 
         media = [
             QuestionMedia(
@@ -185,8 +186,6 @@ async def seed() -> None:
                 position=0,
             ),
         ]
-        session.add_all(media)
-
         quizzes = [
             Quiz(
                 title="Beginner Basics",
@@ -208,6 +207,8 @@ async def seed() -> None:
             ),
         ]
         session.add_all(quizzes)
+        session.add_all(media)
+        await session.flush()
 
         link_spec = [
             (quizzes[0], [0, 1, 2, 3]),
@@ -255,6 +256,7 @@ async def seed() -> None:
             ),
         ]
         session.add_all(attempts)
+        await session.flush()
 
         answers = [
             Answer(

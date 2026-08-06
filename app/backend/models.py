@@ -1,9 +1,28 @@
 from datetime import datetime, UTC
 from enum import Enum
+from typing import Any
 from uuid import UUID, uuid4
 
 from sqlalchemy import Column, JSON, DateTime, UniqueConstraint
 from sqlmodel import Field, Relationship, SQLModel
+
+
+def _utcnow() -> datetime:
+    return datetime.now(UTC)
+
+
+def _tz_datetime_column(*, onupdate: bool = False) -> Column:
+    """A PostgreSQL timezone-aware timestamp column.
+
+    ``sqlmodel`` compiles a plain ``datetime`` field to a naive
+    ``TIMESTAMP WITHOUT TIME ZONE`` column, which asyncpg rejects when the
+    bound value is tz-aware (as our ``datetime.now(UTC)`` defaults are). Using
+    ``DateTime(timezone=True)`` keeps every stored timestamp consistent.
+    """
+    kwargs: dict[str, Any] = {"default": _utcnow}
+    if onupdate:
+        kwargs["onupdate"] = _utcnow
+    return Column(DateTime(timezone=True), **kwargs)
 
 # -------------------------
 # Enums
@@ -48,15 +67,11 @@ class User(SQLModel, table=True):
     email: str = Field(index=True, unique=True)
     level: LanguageLevel
 
-    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
-    
+    created_at: datetime = Field(default_factory=_utcnow, sa_column=_tz_datetime_column())
+
     updated_at: datetime = Field(
-        default_factory=lambda: datetime.now(UTC),
-        sa_column=Column(
-            DateTime(timezone=True),
-            default=lambda: datetime.now(UTC),
-            onupdate=lambda: datetime.now(UTC),
-        ),
+        default_factory=_utcnow,
+        sa_column=_tz_datetime_column(onupdate=True),
     )
 
     attempts: list["QuizAttempt"] = Relationship(back_populates="user")
@@ -95,8 +110,8 @@ class Quiz(SQLModel, table=True):
     category: QuizCategory = QuizCategory.READING
     level: LanguageLevel = LanguageLevel.A1
 
-    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    created_at: datetime = Field(default_factory=_utcnow, sa_column=_tz_datetime_column())
+    updated_at: datetime = Field(default_factory=_utcnow, sa_column=_tz_datetime_column(onupdate=True))
 
     questions: list["Question"] = Relationship(
         back_populates="quizzes",
@@ -123,7 +138,7 @@ class Question(SQLModel, table=True):
 
     config: dict = Field(sa_column=Column(JSON))
 
-    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    created_at: datetime = Field(default_factory=_utcnow, sa_column=_tz_datetime_column())
 
     media: list["QuestionMedia"] = Relationship(back_populates="question")
 
@@ -174,8 +189,11 @@ class QuizAttempt(SQLModel, table=True):
         index=True,
     )
 
-    started_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
-    finished_at: datetime | None = None
+    started_at: datetime = Field(default_factory=_utcnow, sa_column=_tz_datetime_column())
+    finished_at: datetime | None = Field(
+        default=None,
+        sa_column=Column(DateTime(timezone=True)),
+    )
 
     score: float | None = None
 
@@ -223,7 +241,7 @@ class Answer(SQLModel, table=True):
 
     points_awarded: float = 0
 
-    answered_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    answered_at: datetime = Field(default_factory=_utcnow, sa_column=_tz_datetime_column())
 
     question: Question = Relationship(back_populates="answers")
 
