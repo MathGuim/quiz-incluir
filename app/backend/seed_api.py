@@ -33,23 +33,23 @@ DEFAULT_BASE_URL = (
 )
 DEFAULT_EMAIL = "seed@example.com"
 
-# DEFAULT_JSON = Path(__file__).resolve().parents[2] / "app" / "ai" / "generated_questions.json"
-# QUIZ_TITLE = "Cross-Cultural Communication"
-# QUIZ_DESCRIPTION = "C1 reading comprehension on cross-cultural business communication"
-# QUIZ_CATEGORY = "reading"
-# QUIZ_LEVEL = "C1"
-# SOURCE_MEDIA_URL = "https://storage.googleapis.com/quiz_public_bucket/cross_cultural_communication.md"
-# SOURCE_MEDIA_CAPTION = "Reading passage"
-# SOURCE_MEDIA_TYPE = "text"
-
-DEFAULT_JSON = Path(__file__).resolve().parents[2] / "app" / "ai" / "generated_questions_listening.json"
-QUIZ_TITLE = "Birthday Parties"
-QUIZ_DESCRIPTION = "C1 listening comprehension on Birthday parties"
-QUIZ_CATEGORY = "listening"
+DEFAULT_JSON = Path(__file__).resolve().parents[2] / "app" / "ai" / "generated_questions.json"
+QUIZ_TITLE = "Cross-Cultural Communication"
+QUIZ_DESCRIPTION = "C1 reading comprehension on cross-cultural business communication"
+QUIZ_CATEGORY = "reading"
 QUIZ_LEVEL = "C1"
-SOURCE_MEDIA_URL = "https://storage.googleapis.com/quiz_public_bucket/fixed.mp3"
-SOURCE_MEDIA_CAPTION = "Listen carefully to the audio"
-SOURCE_MEDIA_TYPE = "audio"
+SOURCE_MEDIA_URL = "https://storage.googleapis.com/quiz_public_bucket/cross_cultural_communication.md"
+SOURCE_MEDIA_CAPTION = "Reading passage"
+SOURCE_MEDIA_TYPE = "text"
+
+# DEFAULT_JSON = Path(__file__).resolve().parents[2] / "app" / "ai" / "generated_questions_listening.json"
+# QUIZ_TITLE = "Birthday Parties"
+# QUIZ_DESCRIPTION = "C1 listening comprehension on Birthday parties"
+# QUIZ_CATEGORY = "listening"
+# QUIZ_LEVEL = "C1"
+# SOURCE_MEDIA_URL = "https://storage.googleapis.com/quiz_public_bucket/fixed.mp3"
+# SOURCE_MEDIA_CAPTION = "Listen carefully to the audio"
+# SOURCE_MEDIA_TYPE = "audio"
 
 
 def _config_for(item: dict) -> dict:

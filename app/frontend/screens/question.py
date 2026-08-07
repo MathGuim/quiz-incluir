@@ -39,6 +39,7 @@ def QuestionScreen(state: AppState, controller: QuizController):
         controller.previous()
 
     async def on_submit(e):
+        print("NEXT CLICKED", flush=True)
         await stop_audio()
         response = widget.extract()
         if response is None:
