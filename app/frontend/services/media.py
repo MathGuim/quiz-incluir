@@ -1,9 +1,12 @@
 """Media helpers: URL resolution and the shared Audio service.
 
-The audio service keeps a module-level strong reference (``_audio_refs``).
-Flet's page service registry drops services whose refcount is too low, which
-used to break playback with a "Future not completed" timeout. Holding a strong
-reference keeps the service alive across re-renders.
+The Audio service is created once, with a concrete ``src``, and registered
+into ``page.services`` *before* the page is built/rendered. flet binds a
+client-side invoke-method listener for a service when it is added to the page —
+registering late/after page open (or without a ``src``) is what caused
+``Timeout waiting for invoke method listener`` errors (see the flet 0.86.4
+changelog). A module-level strong reference keeps the service alive across
+re-renders, because flet drops weakly-referenced services from the registry.
 """
 
 from __future__ import annotations
@@ -14,7 +17,12 @@ import urllib.parse
 import flet as ft
 from flet_audio import Audio
 
-_audio_refs: list = []
+# A valid placeholder source, so the service satisfies the "src must be a
+# string" contract at construction. It is replaced with a real URL whenever a
+# question's audio player attaches.
+PLACEHOLDER_SRC = "https://storage.googleapis.com/quiz_public_bucket/LE_listening_C1_Birthday_parties.mp3"
+
+_audio: Audio | None = None
 
 
 def resolve_media_url(url: str | None, base_url: str) -> str:
@@ -35,23 +43,38 @@ def resolve_media_url(url: str | None, base_url: str) -> str:
     return f"{base_url.rstrip('/')}/{url.lstrip('/')}"
 
 
-def ensure_audio() -> Audio:
-    """Return the shared Audio service, creating and registering it if needed."""
-    page = ft.context.page
-    if not _audio_refs:
-        _audio_refs.append(Audio(src=None, volume=1.0))
-    audio = _audio_refs[0]
-    if audio not in page.services:
-        page.services.append(audio)
-    registry = page._services
-    if audio not in registry._services:
-        registry.register_service(audio)
+def register_audio(page: ft.Page, src: str = PLACEHOLDER_SRC) -> Audio:
+    """Create (once) and register the shared Audio service on the page.
+
+    Call this before the page is rendered so the web client binds the
+    invoke-method handler for the audio service. Idempotent.
+    """
+    global _audio
+    if _audio is None:
+        _audio = Audio(src=src, volume=1.0)
+    if _audio not in page.services:
+        page.services.append(_audio)
+    return _audio
+
+
+def ensure_audio(page: ft.Page) -> Audio:
+    """Return the shared Audio service, registering it if needed."""
+    return register_audio(page)
+
+
+def set_audio_src(page: ft.Page, resolved_url: str) -> Audio:
+    """Point the shared service at ``resolved_url`` and refresh the client."""
+    audio = ensure_audio(page)
+    if audio.src != resolved_url:
+        audio.src = resolved_url
+        audio.update()
     return audio
 
 
 async def stop_audio() -> None:
     """Pause the shared audio when leaving a question (Play can resume it)."""
-    await ensure_audio().pause()
+    if _audio is not None:
+        await _audio.pause()
 
 
 def launch_url(url: str) -> None:

@@ -1,0 +1,18 @@
+[
+  {
+    "origin": [
+      "https://your-flutter-app.com",
+      "http://localhost:xxxx"
+    ],
+    "method": [
+      "GET",
+      "HEAD"
+    ],
+    "responseHeader": [
+      "Content-Type",
+      "Accept-Ranges",
+      "Content-Length"
+    ],
+    "maxAgeSeconds": 3600
+  }
+]

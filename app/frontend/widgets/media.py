@@ -6,14 +6,50 @@ shared Audio service via side-effect handlers.
 
 from __future__ import annotations
 
+import httpx
 import flet as ft
 from flet import component, use_effect, use_ref, use_state
 
 from flet_video import Video, VideoMedia
 
 from models.media import Media, MediaType
-from services.media import ensure_audio, launch_url, resolve_media_url
+from services.media import launch_url, resolve_media_url, set_audio_src
 import theme
+
+
+@component
+def MarkdownMedia(media: Media, base_url: str):
+    """Fetch and render a TEXT media url's markdown content.
+
+    The ``url`` points to a markdown file, so it is fetched (server-side via
+    httpx) and its body is rendered through ``ft.Markdown``. If there is no url
+    or the fetch fails, the caption is shown instead.
+    """
+    content, set_content = use_state("")
+    url = media.url or ""
+    caption = media.caption or ""
+
+    def fetch():
+        if not url:
+            return
+        try:
+            resp = httpx.get(
+                resolve_media_url(url, base_url),
+                timeout=15,
+                follow_redirects=True,
+            )
+            resp.raise_for_status()
+            set_content(resp.text)
+        except Exception:
+            set_content(caption)
+
+    use_effect(fetch, [url])
+
+    return ft.Markdown(
+        content or caption,
+        selectable=True,
+        extension_set=ft.MarkdownExtensionSet.GITHUB_WEB,
+    )
 
 
 @component
@@ -34,24 +70,24 @@ def AudioPlayer(resolved_url: str):
         set_value(e.position / duration if duration and duration > 0 else 0.0)
 
     def attach():
-        audio = ensure_audio()
-        audio.src = resolved_url
+        # The service is pre-registered (see main.py). Point it at this
+        # question's source and wire position events; the web client already
+        # has a bound invoke-method handler for it.
+        audio = set_audio_src(ft.context.page, resolved_url)
         audio.on_duration_change = on_duration
         audio.on_position_change = on_position
 
     use_effect(attach, [resolved_url])
 
     async def play(e):
-        audio = ensure_audio()
-        attach()
-        ft.context.page.update()
+        audio = set_audio_src(ft.context.page, resolved_url)
         await audio.play()
 
     async def pause(e):
-        await ensure_audio().pause()
+        await set_audio_src(ft.context.page, resolved_url).pause()
 
     async def resume(e):
-        await ensure_audio().resume()
+        await set_audio_src(ft.context.page, resolved_url).resume()
 
     controls = ft.Row(
         [
@@ -87,13 +123,7 @@ def _build_media(media: Media, base_url: str) -> list[ft.Control]:
             )
         )
     elif mtype == MediaType.TEXT and (caption or url):
-        widgets.append(
-            ft.Markdown(
-                caption or url,
-                selectable=True,
-                extension_set=ft.MarkdownExtensionSet.GITHUB_WEB,
-            )
-        )
+        widgets.append(MarkdownMedia(media, base_url))
     elif mtype == MediaType.AUDIO and url:
         widgets.append(AudioPlayer(resolve_media_url(url, base_url)))
     elif mtype == MediaType.VIDEO and url:

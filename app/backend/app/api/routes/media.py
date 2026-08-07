@@ -23,7 +23,14 @@ async def list_media(
 ) -> list[QuestionMedia]:
     stmt = select(QuestionMedia).order_by(QuestionMedia.position)
     if question_id:
-        stmt = stmt.where(QuestionMedia.question_id == question_id)
+        try:
+            qid = UUID(question_id)
+        except ValueError:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="question_id must be a valid UUID",
+            )
+        stmt = stmt.where(QuestionMedia.question_id == qid)
     result = await db.exec(stmt.offset(skip).limit(limit))
     return list(result.all())
 

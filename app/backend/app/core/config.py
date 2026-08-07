@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "Quiz API"
 
     DATABASE_URL: str = Field(
-        default="sqlite+aiosqlite:///./quiz.db",
+        default="postgresql+asyncpg://postgres:postgres@localhost:5432/quiz",
         description="Async database URL",
     )
 

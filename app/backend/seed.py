@@ -174,7 +174,7 @@ async def seed() -> None:
             QuestionMedia(
                 question_id=questions[5].id,
                 type=MediaType.AUDIO,
-                url="https://storage.googleapis.com/quiz_public_bucket/en-planning-a-vacation-69.mp3",
+                url="https://storage.googleapis.com/quiz_public_bucket/LE_listening_C1_Birthday_parties.mp3",
                 caption="Listen to the sentence",
                 position=0,
             ),

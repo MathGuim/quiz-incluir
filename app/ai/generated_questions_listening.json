@@ -1,0 +1,151 @@
+[
+  {
+    "type": "multiple_choice",
+    "level": "C1",
+    "prompt": "What is Charles's primary objection to the idea of a surprise party?",
+    "correct": 1,
+    "choices": [
+      "The financial burden of hosting a large group of people.",
+      "The psychological strain of having to perform a specific emotional reaction.",
+      "The logistical difficulty of coordinating guests without their knowledge.",
+      "The risk of guests arriving at the wrong venue or time."
+    ],
+    "explanations": [
+      "Charles does not mention money or costs.",
+      "Good Job!",
+      "Charles views the organization as the host's burden, not the surprise's logistics.",
+      "Venue errors are not discussed in the text."
+    ],
+    "suggested_score": 4.5
+  },
+  {
+    "type": "multiple_choice",
+    "level": "C1",
+    "prompt": "When Dora mentions her 30th birthday bash, what is she attempting to do?",
+    "correct": 2,
+    "choices": [
+      "Remind Charles of the logistical effort required for such an event.",
+      "Suggest that she is more generous than Charles is.",
+      "Challenge the validity of Charles's claim that birthday celebrations are inherently ego-driven.",
+      "Encourage Charles to throw a similarly large party for his 40th."
+    ],
+    "explanations": [
+      "She is not discussing logistics here, but the motive behind the party.",
+      "Generosity is mentioned later as a sarcastic point, not the primary goal of this specific mention.",
+      "Good Job!",
+      "She is actually arguing against his perspective, not encouraging him to imitate her."
+    ],
+    "suggested_score": 4.0
+  },
+  {
+    "type": "true_false",
+    "level": "C1",
+    "prompt": "Marco believes that organizing children's birthday parties has become significantly more stressful than it was during his own childhood.",
+    "correct": true,
+    "suggested_score": 3.0
+  },
+  {
+    "type": "multiple_selection",
+    "level": "C1",
+    "prompt": "According to Marco, what are the modern pressures associated with organizing a child's party?",
+    "correct": [
+      0,
+      1,
+      2
+    ],
+    "choices": [
+      "The need for elaborate and specialized activities.",
+      "The risk of being accused of lacking originality.",
+      "The anxiety regarding the number of attendees.",
+      "The high cost of hiring professional makeup artists."
+    ],
+    "explanations": [
+      "Good Job!",
+      "Good Job!",
+      "Good Job!",
+      "While he mentions artists, the 'pressure' is about the trend/expectation, not specifically the cost."
+    ],
+    "suggested_score": 4.5
+  },
+  {
+    "type": "short_text",
+    "level": "C1",
+    "prompt": "Charles describes birthday celebrations as 'self-indulgent attention-seeking'. Which word (max 10 chars) could replace 'self-indulgent' to maintain a similar C1 meaning? (e.g., vain)",
+    "correct": "vain",
+    "suggested_score": 3.5
+  },
+  {
+    "type": "multiple_choice",
+    "level": "C1",
+    "prompt": "What does Charles imply when he says he 'got out of the habit' of celebrating birthdays?",
+    "correct": 3,
+    "choices": [
+      "He forgot the dates of his friends' birthdays.",
+      "He decided that birthdays are for children and are thus immature.",
+      "He began to dislike the attention he received as an adult.",
+      "The transition to adulthood and a changing social circle made celebrations less frequent."
+    ],
+    "explanations": [
+      "He is talking about his own birthday, not others'.",
+      "He explicitly states that he does not mean birthdays are immature.",
+      "While he dislikes attention-seeking, 'the habit' refers to the frequency and style of celebrations.",
+      "Good Job!"
+    ],
+    "suggested_score": 4.0
+  },
+  {
+    "type": "multiple_choice",
+    "level": "C1",
+    "prompt": "Which of the following best describes the shift in Charles's attitude by the end of the conversation?",
+    "correct": 0,
+    "choices": [
+      "From steadfast cynicism to a tentative openness to a nostalgic style of celebration.",
+      "From a desire for solitude to a desperate need for social validation.",
+      "From hatred of surprise parties to a preference for organized events.",
+      "From blaming his parents for his trauma to accepting adult responsibilities."
+    ],
+    "explanations": [
+      "Good Job!",
+      "He never expresses a desperate need for validation.",
+      "He still dislikes the 'hassle', but is open to the 'retro' idea.",
+      "Parents are mentioned by Marco, not as a source of trauma for Charles."
+    ],
+    "suggested_score": 4.5
+  },
+  {
+    "type": "true_false",
+    "level": "C1",
+    "prompt": "Charles believes that all forms of attention-seeking are fundamentally negative.",
+    "correct": false,
+    "suggested_score": 3.0
+  },
+  {
+    "type": "multiple_selection",
+    "level": "C1",
+    "prompt": "Which phrases from the text are idiomatic expressions indicating a lack of interest or effort?",
+    "correct": [
+      0,
+      1
+    ],
+    "choices": [
+      "can't be bothered",
+      "don't go in for",
+      "put your feet up",
+      "catch on"
+    ],
+    "explanations": [
+      "Good Job!",
+      "Good Job!",
+      "This means to relax, not to lack interest.",
+      "This means to become popular."
+    ],
+    "suggested_score": 4.0
+  },
+  {
+    "type": "short_text",
+    "level": "C1",
+    "prompt": "Dora uses the phrase 'Note to self' sarcastically. In a single word, what is the tone she is adopting here?",
+    "correct": "ironic",
+    "suggested_score": 3.5
+  }
+]

@@ -14,7 +14,7 @@ if config.config_file_name is not None:
 
 config.set_main_option(
     "sqlalchemy.url",
-    settings.DATABASE_URL.replace("+aiosqlite", "").replace("+asyncpg", ""),
+    settings.DATABASE_URL.replace("+asyncpg", ""),
 )
 
 target_metadata = SQLModel.metadata

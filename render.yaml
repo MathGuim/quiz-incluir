@@ -14,7 +14,7 @@ services:
       curl -LsSf https://astral.sh/uv/install.sh | sh
       export PATH="$HOME/.local/bin:$PATH"
       cd ../..
-      uv sync
+      uv sync --frozen
     startCommand: |
       export PATH="$HOME/.local/bin:$PATH"
       uv run uvicorn main:app --host 0.0.0.0 --port $PORT
@@ -45,7 +45,7 @@ services:
       curl -LsSf https://astral.sh/uv/install.sh | sh
       export PATH="$HOME/.local/bin:$PATH"
       cd ../..
-      uv sync
+      uv sync --frozen
     startCommand: |
       export PATH="$HOME/.local/bin:$PATH"
       cd ../..

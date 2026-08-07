@@ -9,11 +9,16 @@ from controllers.auth_controller import AuthController
 from controllers.quiz_controller import QuizController
 from router import make_app
 from services.api import QuizApiClient
+from services.media import register_audio
 from state.app_state import AppState
 
 
 def main(page: ft.Page) -> None:
     page.title = config.APP_TITLE
+    # Register the shared Audio service before the page is built so the web
+    # client binds its invoke-method handler up front (registering late is what
+    # produced "Timeout waiting for invoke method listener" on audio.play()).
+    register_audio(page)
     page.theme_mode = ft.ThemeMode.LIGHT
     page.padding = 24
     page.appbar = ft.AppBar(title=ft.Text(config.APP_TITLE), center_title=True)
