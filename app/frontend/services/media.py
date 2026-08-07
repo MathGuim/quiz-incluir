@@ -74,7 +74,10 @@ def set_audio_src(page: ft.Page, resolved_url: str) -> Audio:
 async def stop_audio() -> None:
     """Pause the shared audio when leaving a question (Play can resume it)."""
     if _audio is not None:
-        await _audio.pause()
+        try:
+            await _audio.pause()
+        except Exception:
+            pass
 
 
 def launch_url(url: str) -> None:

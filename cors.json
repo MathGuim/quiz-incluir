@@ -1,8 +1,8 @@
 [
   {
     "origin": [
-      "https://your-flutter-app.com",
-      "http://localhost:xxxx"
+      "https://quiz-frontend-sr8h.onrender.com",
+      "http://localhost:8550"
     ],
     "method": [
       "GET",

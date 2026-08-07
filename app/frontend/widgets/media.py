@@ -14,6 +14,7 @@ from flet_video import Video, VideoMedia
 
 from models.media import Media, MediaType
 from services.media import launch_url, resolve_media_url, set_audio_src
+from widgets.feedback import notify
 import theme
 
 
@@ -81,13 +82,22 @@ def AudioPlayer(resolved_url: str):
 
     async def play(e):
         audio = set_audio_src(ft.context.page, resolved_url)
-        await audio.play()
+        try:
+            await audio.play()
+        except Exception as ex:
+            notify(f"Could not play audio: {ex}", error=True)
 
     async def pause(e):
-        await set_audio_src(ft.context.page, resolved_url).pause()
+        try:
+            await set_audio_src(ft.context.page, resolved_url).pause()
+        except Exception as ex:
+            notify(f"Could not pause audio: {ex}", error=True)
 
     async def resume(e):
-        await set_audio_src(ft.context.page, resolved_url).resume()
+        try:
+            await set_audio_src(ft.context.page, resolved_url).resume()
+        except Exception as ex:
+            notify(f"Could not resume audio: {ex}", error=True)
 
     controls = ft.Row(
         [
