@@ -49,7 +49,7 @@ services:
     startCommand: |
       export PATH="$HOME/.local/bin:$PATH"
       cd ../..
-      uv run flet run app/frontend/main.py --web --host 0.0.0.0 --port $PORT
+      uv run flet run app/frontend/main.py --web --host 0.0.0.0 --port $PORT -vv
     healthCheckPath: /
     autoDeploy: true
     envVars:

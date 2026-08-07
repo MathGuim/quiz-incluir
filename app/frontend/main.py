@@ -38,4 +38,4 @@ def main(page: ft.Page) -> None:
 
 
 if __name__ == "__main__":
-    ft.run(main, web_renderer=ft.WebRenderer.CANVAS_KIT)
+    ft.run(main, no_cdn=True)
