@@ -1,0 +1,164 @@
+{
+  "quiz": {
+    "title": "Birthday Parties",
+    "description": "C1 listening comprehension on Birthday parties",
+    "category": "listening",
+    "level": "C1",
+    "media_type": "audio",
+    "media_caption": "Listen carefully to the audio",
+    "media_url": "https://storage.googleapis.com/quiz_public_bucket/fixed.mp3"
+  },
+  "questions": [
+    {
+      "type": "multiple_choice",
+      "level": "C1",
+      "prompt": "What is the primary reason Charles initially rejects the idea of a birthday celebration?",
+      "correct": 1,
+      "choices": [
+        "He believes that celebrating milestones is a sign of immaturity.",
+        "He finds the logistical burdens and social expectations exhausting.",
+        "He has a deep-seated fear that none of his friends would attend.",
+        "He prefers the simplicity of childhood parties over adult gatherings."
+      ],
+      "explanations": [
+        "While he mentions maturity later, his initial rejection is based on the 'hassle'.",
+        null,
+        "He mentions this as a worry, but the 'hassle' of organizing is his main deterrent.",
+        "He only considers kids-style parties at the very end of the conversation."
+      ],
+      "suggested_score": 4.5
+    },
+    {
+      "type": "true_false",
+      "level": "C1",
+      "prompt": "Charles believes that seeking attention through a party is inherently malicious.",
+      "correct": false,
+      "explanation": "Charles clarifies later in the conversation that 'not all attention-seeking is bad,' though he personally doesn't enjoy it.",
+      "suggested_score": 3.0
+    },
+    {
+      "type": "multiple_selection",
+      "level": "C1",
+      "prompt": "According to Marco, which of the following are challenges associated with organizing modern children's parties?",
+      "correct": [
+        0,
+        1,
+        2
+      ],
+      "choices": [
+        "The need for specialized or elaborate entertainment.",
+        "The social pressure to be original and avoid duplicating other parties.",
+        "The anxiety regarding the guest list and attendance.",
+        "The high cost of hiring professional make-up artists."
+      ],
+      "explanations": [
+        null,
+        null,
+        null,
+        "While he mentions make-up artists, he doesn't specifically cite the 'cost' as the primary challenge, but rather the expectation to provide such things."
+      ],
+      "suggested_score": 4.0
+    },
+    {
+      "type": "short_text",
+      "level": "C1",
+      "prompt": "When Charles describes birthday parties as 'self-indulgent', Dora reacts with ____.",
+      "correct": "indignation",
+      "suggested_score": 3.5
+    },
+    {
+      "type": "multiple_choice",
+      "level": "C1",
+      "prompt": "What does the phrase 'angling for a surprise party' imply in the context of the conversation?",
+      "correct": 3,
+      "choices": [
+        "Dora is trying to convince Charles to plan a party.",
+        "Dora is fishing for information about the venue.",
+        "Dora is expressing her dislike for surprise parties.",
+        "Dora is subtly hinting that she wants to organize a surprise event."
+      ],
+      "explanations": [
+        "She is not asking Charles to plan it; she is the one potentially planning it.",
+        "She is not asking about a venue.",
+        "The opposite is implied by Marco's comment.",
+        null
+      ],
+      "suggested_score": 4.0
+    },
+    {
+      "type": "true_false",
+      "level": "C1",
+      "prompt": "Charles's shift in attitude towards celebrating his 40th birthday is triggered by a nostalgic longing for childhood party traditions.",
+      "correct": true,
+      "explanation": "At the end, after discussing 'retro' kids-style parties (musical chairs, specific foods), Charles admits it's 'not a terrible idea' and decides he might have a party.",
+      "suggested_score": 3.0
+    },
+    {
+      "type": "multiple_choice",
+      "level": "C1",
+      "prompt": "Which of the following best describes the tone of the interaction between Dora and Charles during the middle of the dialogue?",
+      "correct": 0,
+      "choices": [
+        "Playfully argumentative and slightly tense.",
+        "Coldly distant and genuinely hostile.",
+        "Formal and cautious.",
+        "Purely supportive and collaborative."
+      ],
+      "explanations": [
+        null,
+        "They are friends; the tension is based on a 'touchy subject' rather than genuine hatred.",
+        "The language used ('huge ego', 'bash') is informal.",
+        "They spend a significant portion of the time arguing about 'attention-seeking'."
+      ],
+      "suggested_score": 4.0
+    },
+    {
+      "type": "short_text",
+      "level": "C1",
+      "prompt": "Marco uses a sarcastic reference to a book to highlight the ____ nature of modern parenting expectations.",
+      "correct": "absurd",
+      "suggested_score": 3.0
+    },
+    {
+      "type": "multiple_selection",
+      "level": "C1",
+      "prompt": "Which factors contributed to Charles losing interest in birthday celebrations as an adult?",
+      "correct": [
+        0,
+        2
+      ],
+      "choices": [
+        "The transition to professional life and independence.",
+        "A newfound dislike for social gatherings in general.",
+        "The difficulty of establishing a new social circle.",
+        "The realization that birthday parties are immature."
+      ],
+      "explanations": [
+        null,
+        "He doesn't dislike gatherings, just the 'hassle' and 'attention-seeking' of birthdays.",
+        null,
+        "He explicitly states: 'I don't mean birthdays are immature.'"
+      ],
+      "suggested_score": 4.0
+    },
+    {
+      "type": "multiple_choice",
+      "level": "C1",
+      "prompt": "What is the irony in Marco's statement regarding the stress of birthday parties?",
+      "correct": 2,
+      "choices": [
+        "He claims to hate parties but is planning one for his son.",
+        "He thinks children's parties are simpler than adult parties.",
+        "He recalls his own childhood parties as stress-free, while his parents were actually stressed.",
+        "He believes a cinema trip is too complex for nine-year-olds."
+      ],
+      "explanations": [
+        "Marco doesn't say he hates parties; he just says organizing them is a nightmare.",
+        "He argues the opposite\u2014that they are much more stressful now.",
+        null,
+        "He says the cinema trip is 'simple' and a 'winner'."
+      ],
+      "suggested_score": 4.5
+    }
+  ]
+}

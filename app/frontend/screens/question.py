@@ -3,6 +3,7 @@ from __future__ import annotations
 import flet as ft
 from flet import component, use_ref
 
+import config
 import theme
 from config import APP_TITLE
 from controllers.quiz_controller import QuizController
@@ -10,6 +11,7 @@ from state.app_state import AppState
 from widgets.answers.answer_factory import AnswerWidget, answer_factory
 from services.media import stop_audio
 from widgets.feedback import notify
+from widgets.media import media_area
 from widgets.progress_indicator import build_progress
 from widgets.question_card import question_card
 
@@ -31,22 +33,25 @@ def QuestionScreen(state: AppState, controller: QuizController):
     is_last = idx >= total - 1
 
     widget: AnswerWidget = answer_factory(question)
-    widget.build(state.answers.get(idx))
+    widget.build(state.answers.get(str(question.id)))
     answer_ref.current = widget
+
+    answered_indices = {
+        i for i, q in enumerate(state.questions) if str(q.id) in state.answers
+    }
 
     async def on_back(e):
         await stop_audio()
         controller.previous()
 
     async def on_submit(e):
-        print("NEXT CLICKED", flush=True)
         await stop_audio()
         response = widget.extract()
         if response is None:
             notify("Please answer the question first.", error=True)
             return
         try:
-            controller.submit(question.id, response)
+            await controller.submit(str(question.id), response)
         except Exception as ex:
             notify(f"Could not save your answer: {ex}", error=True)
             return
@@ -67,10 +72,16 @@ def QuestionScreen(state: AppState, controller: QuizController):
         expand=True,
     )
 
+    quiz_media = state.quiz.media if state.quiz else []
+
     body = ft.Column(
         [
-            build_progress(total, state.answers, idx),
+            build_progress(total, answered_indices, idx),
             ft.Container(height=12),
+            # Shared context for the whole quiz (e.g. the reading passage or
+            # listening audio) — a persistent header shown on every question,
+            # not just the first, so it stays available for reference.
+            *media_area(quiz_media, config.API_URL),
             question_card(question),
             ft.Container(height=8),
             widget.control,

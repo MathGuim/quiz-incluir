@@ -1,10 +1,26 @@
 from datetime import datetime, UTC
-from enum import Enum
 from typing import Any
 from uuid import UUID, uuid4
 
 from sqlalchemy import Column, JSON, DateTime, UniqueConstraint
 from sqlmodel import Field, Relationship, SQLModel
+
+from quiz_shared.enums import LanguageLevel, MediaType, QuestionType, QuizCategory
+
+__all__ = [
+    "LanguageLevel",
+    "MediaType",
+    "QuestionType",
+    "QuizCategory",
+    "User",
+    "QuizQuestion",
+    "Quiz",
+    "QuizMedia",
+    "Question",
+    "QuestionMedia",
+    "QuizAttempt",
+    "Answer",
+]
 
 
 def _utcnow() -> datetime:
@@ -23,38 +39,6 @@ def _tz_datetime_column(*, onupdate: bool = False) -> Column:
     if onupdate:
         kwargs["onupdate"] = _utcnow
     return Column(DateTime(timezone=True), **kwargs)
-
-# -------------------------
-# Enums
-# -------------------------
-
-class QuestionType(str, Enum):
-    MULTIPLE_CHOICE = "multiple_choice"
-    MULTIPLE_SELECTION = "multiple_selection"
-    TRUE_FALSE = "true_false"
-    SHORT_TEXT = "short_text"
-
-
-class MediaType(str, Enum):
-    TEXT = "text"
-    IMAGE = "image"
-    AUDIO = "audio"
-    VIDEO = "video"
-
-
-class LanguageLevel(str, Enum):
-    A1 = "A1"
-    A2 = "A2"
-    B1 = "B1"
-    B2 = "B2"
-    C1 = "C1"
-    C2 = "C2"
-
-
-class QuizCategory(str, Enum):
-    READING = "reading"
-    LISTENING = "listening"
-    VOCABULARY = "vocabulary"
 
 # -------------------------
 # Users
@@ -120,6 +104,33 @@ class Quiz(SQLModel, table=True):
 
     attempts: list["QuizAttempt"] = Relationship(back_populates="quiz")
 
+    media: list["QuizMedia"] = Relationship(back_populates="quiz")
+
+
+# -------------------------
+# Quiz media
+# -------------------------
+# Shared context for the whole quiz (e.g. a reading passage or listening
+# audio clip that every question refers to) — distinct from QuestionMedia,
+# which is a per-question illustration (e.g. a vocabulary quiz's per-word
+# image). Both can be used on the same quiz; neither implies the other.
+
+class QuizMedia(SQLModel, table=True):
+    __tablename__ = "quiz_media"
+
+    id: UUID = Field(default_factory=uuid4, primary_key=True)
+
+    quiz_id: UUID = Field(
+        foreign_key="quizzes.id",
+        index=True,
+    )
+
+    type: MediaType
+    url: str | None = None
+    caption: str | None = None
+    position: int = 0
+
+    quiz: Quiz = Relationship(back_populates="media")
 
 # -------------------------
 # Question

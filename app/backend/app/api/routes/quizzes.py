@@ -8,7 +8,8 @@ from sqlmodel import select
 from app.api.deps import get_current_user
 from app.core.database import get_db
 from app.crud import quiz as crud_quiz
-from app.models import Question, Quiz, QuizQuestion, User
+from app.models import Question, Quiz, QuizMedia, QuizQuestion, User
+from app.schemas.media import QuizMediaRead
 from app.schemas.quiz import (
     QuizCreate,
     QuizQuestionLink,
@@ -22,6 +23,10 @@ router = APIRouter()
 
 async def _to_read(db: AsyncSession, quiz: Quiz) -> QuizRead:
     question_ids = await crud_quiz.get_question_ids(db, quiz.id)
+    media_result = await db.exec(
+        select(QuizMedia).where(QuizMedia.quiz_id == quiz.id).order_by(QuizMedia.position)
+    )
+    media = [QuizMediaRead.model_validate(m) for m in media_result.all()]
     return QuizRead(
         id=quiz.id,
         title=quiz.title,
@@ -31,6 +36,7 @@ async def _to_read(db: AsyncSession, quiz: Quiz) -> QuizRead:
         created_at=quiz.created_at,
         updated_at=quiz.updated_at,
         question_ids=question_ids,
+        media=media,
     )
 
 

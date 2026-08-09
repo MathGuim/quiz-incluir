@@ -1,10 +1,10 @@
-from datetime import datetime
-from uuid import UUID
-
 from pydantic import EmailStr, Field
 from sqlmodel import SQLModel
 
 from app.models import LanguageLevel
+from quiz_shared.schemas import UserRead
+
+__all__ = ["UserBase", "UserCreate", "UserRead", "UserUpdate", "UserLevelUpdate"]
 
 
 class UserBase(SQLModel):
@@ -14,12 +14,6 @@ class UserBase(SQLModel):
 
 class UserCreate(UserBase):
     pass
-
-
-class UserRead(UserBase):
-    id: UUID
-    created_at: datetime
-    updated_at: datetime
 
 
 class UserUpdate(SQLModel):

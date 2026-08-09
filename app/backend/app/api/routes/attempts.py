@@ -2,11 +2,13 @@ from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 
 from app.api.deps import get_current_user
 from app.core.database import get_db
+from app.core.pdf_report import build_attempt_report
 from app.crud import attempt as crud_attempt
 from app.models import QuizAttempt, User
 from app.schemas.answer import AnswerRead, AnswerSubmit
@@ -106,3 +108,27 @@ async def finish_attempt(
         )
     attempt = await crud_attempt.finish(db, attempt)
     return await _to_read(db, attempt)
+
+
+@router.get("/{attempt_id}/report.pdf")
+async def download_attempt_report(
+    attempt_id: UUID,
+    db: Annotated[AsyncSession, Depends(get_db)],
+    current_user: Annotated[User, Depends(get_current_user)],
+) -> Response:
+    attempt = await crud_attempt.get_or_404(db, attempt_id)
+    if attempt.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not allowed to view this attempt",
+        )
+    quiz, rows = await crud_attempt.get_report_rows(db, attempt)
+    max_score = await crud_attempt.get_max_score(db, attempt.quiz_id)
+    pdf_bytes = build_attempt_report(quiz, attempt, max_score, rows)
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f'attachment; filename="quiz-report-{attempt_id}.pdf"'
+        },
+    )

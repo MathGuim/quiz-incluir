@@ -1,8 +1,11 @@
-from datetime import datetime
 from typing import Any
 from uuid import UUID
 
 from sqlmodel import SQLModel
+
+from quiz_shared.schemas import AnswerRead
+
+__all__ = ["AnswerCreate", "AnswerSubmit", "AnswerRead", "AnswerUpdate"]
 
 
 class AnswerCreate(SQLModel):
@@ -12,16 +15,6 @@ class AnswerCreate(SQLModel):
 
 class AnswerSubmit(AnswerCreate):
     pass
-
-
-class AnswerRead(SQLModel):
-    id: UUID
-    attempt_id: UUID
-    question_id: UUID
-    response: dict[str, Any]
-    is_correct: bool | None = None
-    points_awarded: float
-    answered_at: datetime
 
 
 class AnswerUpdate(SQLModel):

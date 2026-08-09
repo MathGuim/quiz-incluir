@@ -81,14 +81,10 @@ def AudioPlayer(resolved_url: str):
     use_effect(attach, [resolved_url])
 
     async def play(e):
-        print("PLAY CLICKED", flush=True)
         audio = set_audio_src(ft.context.page, resolved_url)
-        print("AUDIO SRC SET", audio.src, flush=True)
         try:
             await audio.play()
-            print("AUDIO PLAY RETURNED", flush=True)
         except Exception as ex:
-            print("AUDIO PLAY FAILED", repr(ex), flush=True)
             notify(f"Could not play audio: {ex}", error=True)
 
     async def pause(e):

@@ -4,10 +4,9 @@ from uuid import UUID
 
 from sqlmodel import SQLModel
 
+from quiz_shared.schemas import TokenRead as Token
 
-class Token(SQLModel):
-    access_token: str
-    token_type: str = "bearer"
+__all__ = ["Token", "TokenData"]
 
 
 class TokenData(SQLModel):

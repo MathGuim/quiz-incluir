@@ -3,6 +3,17 @@ from uuid import UUID
 from sqlmodel import SQLModel
 
 from app.models import MediaType
+from quiz_shared.schemas import MediaRead, QuizMediaRead
+
+__all__ = [
+    "MediaBase",
+    "MediaCreate",
+    "MediaUpdate",
+    "MediaRead",
+    "QuizMediaCreate",
+    "QuizMediaUpdate",
+    "QuizMediaRead",
+]
 
 
 class MediaBase(SQLModel):
@@ -23,6 +34,12 @@ class MediaUpdate(SQLModel):
     position: int | None = None
 
 
-class MediaRead(MediaBase):
-    id: UUID
-    question_id: UUID
+class QuizMediaCreate(MediaBase):
+    quiz_id: UUID
+
+
+class QuizMediaUpdate(SQLModel):
+    type: MediaType | None = None
+    url: str | None = None
+    caption: str | None = None
+    position: int | None = None

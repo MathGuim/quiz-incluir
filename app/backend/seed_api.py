@@ -1,6 +1,6 @@
 """Seed a running backend through its HTTP API.
 
-Reads ``app/ai/generated_questions.json`` and creates the questions, a C1
+Reads ``app/ai/questions_cache.json`` and creates the questions, a C1
 reading quiz, and their links via the public API of a target deployment.
 No direct database access is required.
 
@@ -33,23 +33,11 @@ DEFAULT_BASE_URL = (
 )
 DEFAULT_EMAIL = "seed@example.com"
 
-DEFAULT_JSON = Path(__file__).resolve().parents[2] / "app" / "ai" / "generated_questions.json"
-QUIZ_TITLE = "Cross-Cultural Communication"
-QUIZ_DESCRIPTION = "C1 reading comprehension on cross-cultural business communication"
-QUIZ_CATEGORY = "reading"
-QUIZ_LEVEL = "C1"
-SOURCE_MEDIA_URL = "https://storage.googleapis.com/quiz_public_bucket/cross_cultural_communication.md"
-SOURCE_MEDIA_CAPTION = "Reading passage"
-SOURCE_MEDIA_TYPE = "text"
-
-# DEFAULT_JSON = Path(__file__).resolve().parents[2] / "app" / "ai" / "generated_questions_listening.json"
-# QUIZ_TITLE = "Birthday Parties"
-# QUIZ_DESCRIPTION = "C1 listening comprehension on Birthday parties"
-# QUIZ_CATEGORY = "listening"
-# QUIZ_LEVEL = "C1"
-# SOURCE_MEDIA_URL = "https://storage.googleapis.com/quiz_public_bucket/fixed.mp3"
-# SOURCE_MEDIA_CAPTION = "Listen carefully to the audio"
-# SOURCE_MEDIA_TYPE = "audio"
+DEFAULT_JSON = Path(__file__).resolve().parents[2] / "app" / "ai" / "questions_cache.json"
+# Quiz title/description/category/level and the shared media (type/url/
+# caption) all come from the JSON's "quiz" key now (see
+# ai/question_generation.py) instead of being hardcoded here. Point --json at
+# questions_cache.json to seed the listening quiz instead.
 
 
 def _config_for(item: dict) -> dict:
@@ -124,7 +112,9 @@ def main() -> int:
         print(f"questions file not found: {questions_path}", file=sys.stderr)
         return 1
 
-    items = json.loads(questions_path.read_text(encoding="utf-8"))
+    payload = json.loads(questions_path.read_text(encoding="utf-8"))
+    quiz_data = payload["quiz"]
+    items = payload["questions"]
 
     with httpx.Client(base_url=base, timeout=60) as client:
         # 1. Auth (the token route auto-creates the user).
@@ -171,23 +161,24 @@ def main() -> int:
             created += 1
 
         # 4. Create the quiz (reusing one with the same title).
-        quiz = existing_quizzes.get(QUIZ_TITLE)
+        quiz_title = quiz_data["title"]
+        quiz = existing_quizzes.get(quiz_title)
         if quiz is None:
             resp = client.post(
                 f"{API_PREFIX}/quizzes",
                 json={
-                    "title": QUIZ_TITLE,
-                    "description": QUIZ_DESCRIPTION,
-                    "category": QUIZ_CATEGORY,
-                    "level": QUIZ_LEVEL,
+                    "title": quiz_title,
+                    "description": quiz_data["description"],
+                    "category": quiz_data["category"],
+                    "level": quiz_data["level"],
                 },
                 headers=headers,
             )
             _raise_for_status(resp)
             quiz = resp.json()
-            print(f"Created quiz {quiz['id']} ({QUIZ_TITLE})")
+            print(f"Created quiz {quiz['id']} ({quiz_title})")
         else:
-            print(f"Reused existing quiz {quiz['id']} ({QUIZ_TITLE})")
+            print(f"Reused existing quiz {quiz['id']} ({quiz_title})")
 
         # 5. Link questions to the quiz in order.
         quiz_id = quiz["id"]
@@ -205,36 +196,36 @@ def main() -> int:
             _raise_for_status(resp)
             linked += 1
 
-        # 6. Attach the shared source document as TEXT media to each question.
-        media_created = media_reused = 0
-        for qid in question_ids:
-            resp = client.get(f"{API_PREFIX}/media", params={"question_id": qid})
-            _raise_for_status(resp)
-            existing = resp.json() if resp.content else []
-            if any(
-                m.get("type") == SOURCE_MEDIA_TYPE and m.get("url") == SOURCE_MEDIA_URL
-                for m in existing
-            ):
-                media_reused += 1
-                continue
+        # 6. Attach the shared source document as media on the quiz itself
+        #    (shared context for every question, not duplicated per question).
+        media_type = quiz_data["media_type"]
+        media_url = quiz_data["media_url"]
+        media_caption = quiz_data["media_caption"]
+        media_resp = client.get(f"{API_PREFIX}/quiz-media", params={"quiz_id": quiz_id})
+        _raise_for_status(media_resp)
+        existing_media = media_resp.json() if media_resp.content else []
+        media_reused = any(
+            m.get("type") == media_type and m.get("url") == media_url
+            for m in existing_media
+        )
+        if not media_reused:
             resp = client.post(
-                f"{API_PREFIX}/media",
+                f"{API_PREFIX}/quiz-media",
                 json={
-                    "question_id": qid,
-                    "type": SOURCE_MEDIA_TYPE,
-                    "url": SOURCE_MEDIA_URL,
-                    "caption": SOURCE_MEDIA_CAPTION,
+                    "quiz_id": quiz_id,
+                    "type": media_type,
+                    "url": media_url,
+                    "caption": media_caption,
                     "position": 0,
                 },
                 headers=headers,
             )
             _raise_for_status(resp)
-            media_created += 1
 
         print(
             f"Done: {created} questions created, {reused} reused; "
             f"{linked} linked, {skipped} already linked; "
-            f"{media_created} media created, {media_reused} already present."
+            f"quiz media {'already present' if media_reused else 'created'}."
         )
     return 0
 

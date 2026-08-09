@@ -1,8 +1,9 @@
 """Seed the database with AI-generated questions.
 
-Reads the cached questions produced by ``ai/question_generation.py``
-(``ai/generated_questions.json``) and stores them as ``Question`` rows linked
-into a single quiz. The original ``seed.py`` demo data is left untouched.
+Reads the cached questions+quiz metadata produced by
+``ai/question_generation.py`` (``ai/questions_cache.json`` by
+default) and stores them as a ``Quiz``/``QuizMedia``/``Question`` rows. The
+original ``seed.py`` demo data is left untouched.
 
 Usage:
     ../.venv/bin/python seed_ai.py              # seed from existing cache
@@ -27,17 +28,20 @@ from models import (
     QuestionMedia,
     QuestionType,
     Quiz,
+    QuizAttempt,
+    QuizCategory,
+    QuizMedia,
     QuizQuestion,
 )
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-CACHE_FILE = REPO_ROOT / "ai" / "generated_questions.json"
+CACHE_FILE = REPO_ROOT / "ai" / "questions_cache.json"
 
 sys.path.insert(0, str(REPO_ROOT))
 
 
 async def clear_quiz_data(session) -> None:
-    for model in (Answer, QuestionMedia, QuizQuestion, Question, Quiz):
+    for model in (Answer, QuizAttempt, QuestionMedia, QuizMedia, QuizQuestion, Question, Quiz):
         await session.exec(delete(model))
     await session.commit()
 
@@ -67,18 +71,11 @@ async def seed() -> None:
     await init_db()
 
     if "--generate" in sys.argv:
-        from ai.question_generation import generate_questions, text
+        from ai.question_generation import ACTIVE_SOURCE, generate_questions, write_cache
 
-        questions = generate_questions(level="C1")
-        CACHE_FILE.write_text(
-            json.dumps([q.model_dump() for q in questions], indent=2),
-            encoding="utf-8",
-        )
+        questions = generate_questions(ACTIVE_SOURCE)
+        write_cache(ACTIVE_SOURCE, questions, CACHE_FILE)
         print(f"Generated {len(questions)} questions -> {CACHE_FILE}")
-    else:
-        from ai.question_generation import text
-
-    source_text = text
 
     if not CACHE_FILE.exists():
         raise SystemExit(
@@ -86,6 +83,8 @@ async def seed() -> None:
         )
 
     payload = json.loads(CACHE_FILE.read_text(encoding="utf-8"))
+    quiz_data = payload["quiz"]
+    questions_data = payload["questions"]
 
     async with async_session_maker() as session:
         if "--reset" in sys.argv:
@@ -94,7 +93,7 @@ async def seed() -> None:
         existing = (
             await session.exec(
                 select(func.count(Question.id)).where(
-                    Question.prompt.in_([q["prompt"] for q in payload])
+                    Question.prompt.in_([q["prompt"] for q in questions_data])
                 )
             )
         ).one()
@@ -111,29 +110,29 @@ async def seed() -> None:
                 suggested_score=data["suggested_score"],
                 config=build_config(data),
             )
-            for data in payload
+            for data in questions_data
         ]
         session.add_all(rows)
         await session.flush()
 
-        for question in rows:
-            session.add(
-                QuestionMedia(
-                    question_id=question.id,
-                    type=MediaType.TEXT,
-                    url=None,
-                    caption=source_text,
-                    position=0,
-                )
-            )
-
         quiz = Quiz(
-            title="Business Etiquette (AI Generated)",
-            description="C1 comprehension questions generated from the business etiquette text.",
-            level=LanguageLevel.C1,
+            title=quiz_data["title"],
+            description=quiz_data["description"],
+            category=QuizCategory(quiz_data["category"]),
+            level=LanguageLevel(quiz_data["level"]),
         )
         session.add(quiz)
         await session.flush()
+
+        session.add(
+            QuizMedia(
+                quiz_id=quiz.id,
+                type=MediaType(quiz_data["media_type"]),
+                url=quiz_data["media_url"],
+                caption=quiz_data["media_caption"],
+                position=0,
+            )
+        )
 
         for position, question in enumerate(rows):
             session.add(
@@ -147,7 +146,7 @@ async def seed() -> None:
         await session.commit()
         print(
             f"Seeded: {len(rows)} questions in quiz '{quiz.title}' "
-            f"(level={quiz.level.value})"
+            f"(category={quiz.category.value}, level={quiz.level.value})"
         )
 
 

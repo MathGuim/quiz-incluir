@@ -1,22 +1,11 @@
-"""Media model matching backend MediaRead + MediaType enum."""
+"""Media model: re-exports the shared enum/read-schema.
+
+See ``quiz_shared.schemas.MediaRead`` for the field list.
+"""
 
 from __future__ import annotations
 
-from enum import Enum
+from quiz_shared.enums import MediaType
+from quiz_shared.schemas import MediaRead as Media
 
-from pydantic import BaseModel
-
-
-class MediaType(str, Enum):
-    TEXT = "text"
-    IMAGE = "image"
-    AUDIO = "audio"
-    VIDEO = "video"
-
-
-class Media(BaseModel):
-    id: str
-    type: MediaType
-    url: str | None = None
-    caption: str | None = None
-    position: int = 0
+__all__ = ["MediaType", "Media"]

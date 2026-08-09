@@ -23,13 +23,14 @@ from models import (
     Quiz,
     QuizAttempt,
     QuizCategory,
+    QuizMedia,
     QuizQuestion,
     User,
 )
 
 
 async def clear_all(session) -> None:
-    for model in (Answer, QuizAttempt, QuizQuestion, QuestionMedia, Question, Quiz, User):
+    for model in (Answer, QuizAttempt, QuizQuestion, QuestionMedia, QuizMedia, Question, Quiz, User):
         await session.exec(delete(model))
     await session.commit()
 
@@ -190,7 +191,7 @@ async def seed() -> None:
             Quiz(
                 title="Beginner Basics",
                 description="A1 level essentials",
-                category=QuizCategory.VOCABULARY,
+                category=QuizCategory.VOCABULARY_GRAMMAR,
                 level=LanguageLevel.A1,
             ),
             Quiz(

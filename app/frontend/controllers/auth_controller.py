@@ -11,9 +11,9 @@ class AuthController:
         self.state = state
         self.api = api
 
-    def login(self, email: str, password: str) -> None:
-        token = self.api.login(email, password)
-        user = self.api.me(token.access_token)
+    async def login(self, email: str, password: str) -> None:
+        token = await self.api.login(email, password)
+        user = await self.api.me(token.access_token)
         self.state.token = token.access_token
         self.state.email = user.email
 

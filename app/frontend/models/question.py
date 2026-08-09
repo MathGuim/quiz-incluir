@@ -1,29 +1,14 @@
-"""Question model matching backend QuestionRead + QuestionType enum."""
+"""Question model: shared read-schema plus a UI-convenience ``options`` property."""
 
 from __future__ import annotations
 
-from enum import Enum
+from quiz_shared.enums import QuestionType
+from quiz_shared.schemas import QuestionRead
 
-from pydantic import BaseModel
-
-from models.media import Media
-
-
-class QuestionType(str, Enum):
-    MULTIPLE_CHOICE = "multiple_choice"
-    MULTIPLE_SELECTION = "multiple_selection"
-    TRUE_FALSE = "true_false"
-    SHORT_TEXT = "short_text"
+__all__ = ["QuestionType", "Question"]
 
 
-class Question(BaseModel):
-    id: str
-    type: QuestionType
-    prompt: str
-    suggested_score: float = 1.0
-    config: dict = {}
-    media: list[Media] = []
-
+class Question(QuestionRead):
     @property
     def options(self) -> list[str]:
         return (self.config or {}).get("options", [])

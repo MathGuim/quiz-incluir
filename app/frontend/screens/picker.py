@@ -9,7 +9,7 @@ from controllers.quiz_controller import QuizController
 from state.app_state import AppState
 from widgets.feedback import notify
 
-SECTION_ORDER = [("reading", "Reading"), ("listening", "Listening"), ("vocabulary", "Vocabulary")]
+SECTION_ORDER = [("reading", "Reading"), ("listening", "Listening"), ("vocabulary_grammar", "Vocabulary")]
 
 _LEVEL_COLORS = {
     "A1": ("#E8F5E9", "#2E7D32"),
@@ -33,9 +33,9 @@ def QuizPickerScreen(state: AppState, controller: QuizController):
     loading, set_loading = use_state(True)
     query, set_query = use_state("")
 
-    def load():
+    async def load():
         try:
-            set_quizzes(controller.list_quizzes())
+            set_quizzes(await controller.list_quizzes())
             set_error("")
         except Exception as ex:
             set_error(f"Could not load quizzes: {ex}")
@@ -44,9 +44,9 @@ def QuizPickerScreen(state: AppState, controller: QuizController):
 
     use_effect(load, [])
 
-    def start(quiz):
+    async def start(quiz):
         try:
-            controller.start(quiz)
+            await controller.start(quiz)
             ft.context.page.navigate("/quiz/0")
         except Exception as ex:
             notify(f"Could not start quiz: {ex}", error=True)
@@ -95,6 +95,10 @@ def QuizPickerScreen(state: AppState, controller: QuizController):
 
     def _quiz_card(quiz):
         circle_bg, circle_fg = _level_colors(quiz.level)
+
+        async def on_card_click(e, q=quiz):
+            await start(q)
+
         return ft.Card(
             elevation=2,
             margin=0,
@@ -102,7 +106,7 @@ def QuizPickerScreen(state: AppState, controller: QuizController):
                 padding=20,
                 border_radius=20,
                 ink=True,
-                on_click=lambda e, q=quiz: start(q),
+                on_click=on_card_click,
                 animate=ft.Animation(250, ft.AnimationCurve.EASE_OUT),
                 content=ft.Row(
                     [

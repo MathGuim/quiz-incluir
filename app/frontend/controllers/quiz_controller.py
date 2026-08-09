@@ -19,20 +19,21 @@ class QuizController:
 
     # ---------- loading ----------
 
-    def list_quizzes(self) -> list[Quiz]:
-        return self.api.list_quizzes(self.state.token)
+    async def list_quizzes(self) -> list[Quiz]:
+        return await self.api.list_quizzes(self.state.token)
 
-    def start(self, quiz: Quiz) -> None:
+    async def start(self, quiz: Quiz) -> None:
         questions = [
-            self.api.get_question(self.state.token, qid) for qid in quiz.question_ids
+            await self.api.get_question(self.state.token, str(qid))
+            for qid in quiz.question_ids
         ]
-        attempt = self.api.start_attempt(self.state.token, quiz.id)
+        attempt = await self.api.start_attempt(self.state.token, str(quiz.id))
         if not questions:
             raise ValueError("This quiz has no questions.")
         self.state.quiz = quiz
         self.state.questions = questions
         self.state.answers = {}
-        self.state.attempt_id = attempt.id
+        self.state.attempt_id = str(attempt.id)
         self.state.current_index = 0
         self.state.finished = False
         self.state.result = None
@@ -61,19 +62,23 @@ class QuizController:
 
     # ---------- answering ----------
 
-    def submit(self, question_id: str, response: dict) -> None:
-        self.api.submit_answer(
+    async def submit(self, question_id: str, response: dict) -> None:
+        await self.api.submit_answer(
             self.state.token, self.state.attempt_id, question_id, response
         )
-        idx = self.state.current_index
-        self.state.answers = {**self.state.answers, idx: response}
+        self.state.answers = {**self.state.answers, question_id: response}
         if self.is_last:
-            self.finish()
+            await self.finish()
         else:
             self.state.current_index += 1
 
-    def finish(self) -> AttemptResult:
-        result = self.api.finish_attempt(self.state.token, self.state.attempt_id)
+    async def finish(self) -> AttemptResult:
+        result = await self.api.finish_attempt(self.state.token, self.state.attempt_id)
         self.state.result = result
         self.state.finished = True
         return result
+
+    # ---------- report ----------
+
+    async def download_report(self) -> bytes:
+        return await self.api.download_report_pdf(self.state.token, self.state.attempt_id)

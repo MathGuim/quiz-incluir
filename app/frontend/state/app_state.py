@@ -26,7 +26,7 @@ class AppState:
     quiz: Quiz | None = None
     questions: list[Question] = dataclasses.field(default_factory=list)
 
-    answers: dict[int, dict] = dataclasses.field(default_factory=dict)
+    answers: dict[str, dict] = dataclasses.field(default_factory=dict)
 
     current_index: int = 0
 

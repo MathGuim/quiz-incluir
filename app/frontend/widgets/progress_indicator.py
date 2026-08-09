@@ -7,7 +7,7 @@ import flet as ft
 import theme
 
 
-def build_progress(indices: int, answers: dict, current: int) -> ft.Control:
+def build_progress(indices: int, answers: dict | set, current: int) -> ft.Control:
     """Render one dot per question: green answered, blue current, grey pending."""
     dots = []
     for i in range(indices):

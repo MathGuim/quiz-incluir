@@ -1,9 +1,19 @@
-from datetime import datetime
 from uuid import UUID
 
 from sqlmodel import SQLModel
 
 from app.models import LanguageLevel, QuizCategory
+from quiz_shared.schemas import QuizRead
+
+__all__ = [
+    "QuizBase",
+    "QuizCreate",
+    "QuizUpdate",
+    "QuizQuestionLinkCreate",
+    "QuizQuestionLink",
+    "QuizRead",
+    "QuizDetail",
+]
 
 
 class QuizBase(SQLModel):
@@ -33,17 +43,6 @@ class QuizQuestionLink(SQLModel):
     quiz_id: UUID
     question_id: UUID
     position: int
-
-
-class QuizRead(SQLModel):
-    id: UUID
-    title: str
-    description: str | None = None
-    category: QuizCategory
-    level: LanguageLevel
-    created_at: datetime
-    updated_at: datetime
-    question_ids: list[UUID] = []
 
 
 class QuizDetail(QuizRead):

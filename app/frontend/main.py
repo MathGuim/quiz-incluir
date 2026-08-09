@@ -18,6 +18,11 @@ def main(page: ft.Page) -> None:
     # Register the shared Audio service before the page is built so the web
     # client binds its invoke-method handler up front (registering late is what
     # produced "Timeout waiting for invoke method listener" on audio.play()).
+    # FilePicker is deliberately NOT registered here: it's only needed much
+    # later (the results-screen download button), and piling a second eager
+    # service registration onto this same timing-sensitive startup path is a
+    # needless risk to Audio's binding for no benefit — services/files.py
+    # registers FilePicker lazily on its first actual use instead.
     register_audio(page)
     page.theme_mode = ft.ThemeMode.LIGHT
     page.padding = 24

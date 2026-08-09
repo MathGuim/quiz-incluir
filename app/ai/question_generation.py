@@ -1,18 +1,8 @@
 import instructor
 
-from enum import Enum
-from pydantic import BaseModel, Field, BeforeValidator
+from pydantic import BaseModel, Field
 from typing import Annotated, Literal
-from instructor import llm_validator
-
-
-class LanguageLevel(str, Enum):
-    A1 = "A1"
-    A2 = "A2"
-    B1 = "B1"
-    B2 = "B2"
-    C1 = "C1"
-    C2 = "C2"
+from quiz_shared.enums import LanguageLevel, QuizCategory, MediaType
 
 
 class MultipleChoiceQuestion(BaseModel):
@@ -20,14 +10,14 @@ class MultipleChoiceQuestion(BaseModel):
     type: Literal["multiple_choice"] = "multiple_choice"
     level: LanguageLevel
 
-    prompt: str= Field(description="Question prompt.")
+    prompt: str = Field(description="Question prompt.")
 
     correct: int = Field(description="Position of the correct answer among the choices below (starting from zero).", ge=0, le=3)
 
     choices: list[str] = Field(description="List of alternatives", min_length=4, max_length=4)
 
-    explanations: list[str] = Field(
-        description="If the alternative is wrong, explain why it is wrong. Otherwise return 'Good Job!'",
+    explanations: list[str | None] = Field(
+        description="If the alternative is wrong, explain why it is wrong. Otherwise return the null value",
         min_length=4, max_length=4
     )
     suggested_score: float = Field(description="How many points (out of 10) should this question be worth", gt=0, lt=5)
@@ -43,8 +33,8 @@ class MultipleSelectionQuestion(BaseModel):
         min_length=1, max_length=4
     )
     choices: list[str] = Field(description="List of alternatives", min_length=4, max_length=4)
-    explanations: list[str] = Field(
-        description="If the alternative is wrong, explain why it is wrong. Otherwise return 'Good Job!'",
+    explanations: list[str | None] = Field(
+        description="If the alternative is wrong, explain why it is wrong. Otherwise return the null value",
         min_length=4, max_length=4
     )
     suggested_score: float = Field(description="How many points (out of 10) should this question be worth", gt=0, lt=5)
@@ -56,21 +46,42 @@ class TrueFalseQuestion(BaseModel):
     level: LanguageLevel
     prompt: Annotated[str, "Affirmation based on the text"]
     correct: Annotated[bool, "Boolean indicating if the affirmation is true or false."]
+    explanation: str = Field(
+        description="Explain why it is true or false.",
+        min_length=4,
+    )
     suggested_score: float = Field(description="How many points (out of 10) should this question be worth", gt=0, lt=5)
 
 
 class ShortTextQuestion(BaseModel):
-    """Return the multiple choice question according to the schema below
+    """Return the short text question according to the schema below
     Ex.: I ____ to the the school yesterday. (went)
     """
     type: Literal["short_text"] = "short_text"
     level: LanguageLevel
     prompt: Annotated[str, "Question prompt."]
-    correct: str = Field(description="Answer to the prompt. It should be no more than a single word", max_length=10, min_length=1)
+    correct: str = Field(description="Answer to the prompt. It should be only a single word", max_length=15, min_length=1)
     suggested_score: float = Field(description="How many points (out of 10) should this question be worth", gt=0, lt=5)
 
 
-text = """
+class QuizSource(BaseModel):
+    """Everything needed to create the quiz these generated questions belong to.
+
+    Written into the output JSON alongside the questions so seed_ai.py/
+    seed_api.py have a single source of truth for quiz-level fields, instead
+    of each hardcoding its own copy.
+    """
+    title: str
+    description: str
+    category: QuizCategory
+    level: LanguageLevel
+    media_type: MediaType
+    media_caption: str
+    media_url: str | None = None
+
+
+
+TEXT = """
 
 Much of today's business is conducted across international borders, and while the majority of the global business community might share the use of English as a common language, the nuances and expectations of business communication might differ greatly from culture to culture. A lack of understanding of the cultural norms and practices of our business acquaintances can result in unfair judgements, misunderstandings and breakdowns in communication. Here are three basic areas of differences in the business etiquette around the world that could help stand you in good stead when you next find yourself working with someone from a different culture.
 
@@ -87,7 +98,7 @@ An American or British person might be looking their client in the eye to show t
 Having an increased awareness of the possible differences in expectations and behaviour can help us avoid cases of miscommunication, but it is vital that we also remember that cultural stereotypes can be detrimental to building good business relationships. Although national cultures could play a part in shaping the way we behave and think, we are also largely influenced by the region we come from, the communities we associate with, our age and gender, our corporate culture and our individual experiences of the world. The knowledge of the potential differences should therefore be something we keep at the back of our minds, rather than something that we use to pigeonhole the individuals of an entire nation.
 """
 
-text = """
+TEXT = """
 Marco: The big four-oh, Charles!
 
 Dora: Oh!! It's your 40th!
@@ -100,7 +111,7 @@ Dora: Why not?
 
 Charles: First, you know me, I can't be bothered with the hassle. It's my birthday but I'm supposed to do all the hard work – contacting people, finding a venue, organising food, worrying who will show up. No, thanks.
 
-Marco: Ah, someone's angling for a surprise party, eh, Dora? 
+Marco: Ah, someone's angling for a surprise party, eh, Dora?
 
 Charles: Marco, stop! Even worse. Having to pretend to be delighted 50 people just sprang up in your living room when you thought you were coming home to put your feet up. Probably having a heart attack at the shock.
 
@@ -122,7 +133,7 @@ Dora: Wow, that's a bit harsh! I had a huge bash for my 30th. And you came. And 
 
 Charles: Not exactly … but … well … at least a small part of you must have been.
 
-Dora: Remind me not to invite you to my 40th then, so you won't have to put up with my huge ego while I feed you and provide free drinks all night because I thought we were friends. 
+Dora: Remind me not to invite you to my 40th then, so you won't have to put up with my huge ego while I feed you and provide free drinks all night because I thought we were friends.
 
 Charles: I meant, er, I mean, not all attention-seeking is bad. It's just not my style is all.
 
@@ -159,48 +170,92 @@ Marco: Yeah, they would. Well, I would anyway. And maybe it'll catch on with my 
 Charles: You've got me thinking … it's not a terrible idea. Maybe I will have a party this year!
 """
 
-if __name__ == "__main__":
-    import json
-    from pathlib import Path
+READING_SOURCE = QuizSource(
+    title="Cross-Cultural Communication",
+    description="C1 reading comprehension on cross-cultural business communication",
+    category=QuizCategory.READING,
+    level=LanguageLevel.C1,
+    media_type=MediaType.TEXT,
+    media_caption="Read the following text carefully",
+    media_url="https://storage.googleapis.com/quiz_public_bucket/cross_cultural_communication.md"
+)
 
-    N_QUESTIONS = 10
-    MODEL = "ollama/gemma4:cloud"
-    LEVEL = "C1"
+LISTENING_SOURCE = QuizSource(
+    title="Birthday Parties",
+    description="C1 listening comprehension on Birthday parties",
+    category=QuizCategory.LISTENING,
+    level=LanguageLevel.C1,
+    media_type=MediaType.AUDIO,
+    media_caption="Listen carefully to the audio",
+    media_url="https://storage.googleapis.com/quiz_public_bucket/fixed.mp3"
+)
 
-    client = instructor.from_provider(MODEL, mode=instructor.Mode.JSON)
+# Swap these two together to switch which quiz gets (re)generated by __main__.
+ACTIVE_SOURCE = LISTENING_SOURCE
+ACTIVE_CACHE_FILE = "questions_cache.json"
 
-    try:
-        questions = client.create(
-            response_model=list[
-                MultipleChoiceQuestion
-                | TrueFalseQuestion
-                | MultipleSelectionQuestion
-                | ShortTextQuestion
-            ],
-            messages=[
+
+def generate_questions(
+    source: QuizSource,
+    n_questions: int = 10,
+    model: str = "ollama/gemma4:cloud",
+) -> list[
+    MultipleChoiceQuestion
+    | TrueFalseQuestion
+    | MultipleSelectionQuestion
+    | ShortTextQuestion
+]:
+    client = instructor.from_provider(model, mode=instructor.Mode.JSON)
+    return client.create(
+        response_model=list[
+            MultipleChoiceQuestion
+            | TrueFalseQuestion
+            | MultipleSelectionQuestion
+            | ShortTextQuestion
+        ],
+        messages=[
             {
                 "role": "system",
                 "content": f"""
-                    You're an english language learning assistant hired to generate {LEVEL} level questions for a quiz based on the text bellow.
+                    You're an english language learning assistant hired to generate {source.level.value} level questions for a quiz based on the text bellow.
 
                     ## Rules for question generation
 
                     + Avoid questions that repeat ipsis litteris what it's on the text.
                     + Don't say objectionable things.
-                    + Generate a diverse ensemble of at least {N_QUESTIONS} questions.
+                    + Generate a diverse ensemble of at least {n_questions} questions.
                 """
 
             },
-            {   
+            {
                 "role": "user",
-                "content": f"<text> {text} </text>"
+                "content": f"<text> {TEXT} </text>"
             }
         ])
+
+
+def write_cache(source: QuizSource, questions: list, path) -> None:
+    import json
+
+    payload = {
+        "quiz": source.model_dump(mode="json"),
+        "questions": [q.model_dump() for q in questions],
+    }
+    path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+
+
+if __name__ == "__main__":
+    from pathlib import Path
+
+    N_QUESTIONS = 10
+    MODEL = "ollama/gemma4:cloud"
+
+    try:
+        questions = generate_questions(ACTIVE_SOURCE, n_questions=N_QUESTIONS, model=MODEL)
     except Exception as e:
         print(e)
+        raise SystemExit(1)
 
-    out = Path(__file__).parent / "generated_questions_listening.json"
-    out.write_text(
-        json.dumps([q.model_dump() for q in questions], indent=2), encoding="utf-8"
-    )
+    out = Path(__file__).parent / ACTIVE_CACHE_FILE
+    write_cache(ACTIVE_SOURCE, questions, out)
     print(f"Wrote {len(questions)} questions to {out}")

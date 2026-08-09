@@ -1,14 +1,10 @@
-"""Quiz model matching backend QuizRead."""
+"""Quiz model: re-exports the shared read-schema.
+
+See ``quiz_shared.schemas.QuizRead`` for the field list.
+"""
 
 from __future__ import annotations
 
-from pydantic import BaseModel
+from quiz_shared.schemas import QuizRead as Quiz
 
-
-class Quiz(BaseModel):
-    id: str
-    title: str
-    description: str | None = None
-    category: str | None = None
-    level: str | None = None
-    question_ids: list[str] = []
+__all__ = ["Quiz"]

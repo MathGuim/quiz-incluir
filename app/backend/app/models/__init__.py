@@ -8,6 +8,7 @@ from models import (
     Quiz,
     QuizAttempt,
     QuizCategory,
+    QuizMedia,
     QuizQuestion,
     User,
 )
@@ -15,6 +16,7 @@ from models import (
 __all__ = [
     "User",
     "Quiz",
+    "QuizMedia",
     "Question",
     "QuestionMedia",
     "QuizAttempt",

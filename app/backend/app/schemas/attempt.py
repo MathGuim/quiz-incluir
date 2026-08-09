@@ -1,21 +1,14 @@
-from datetime import datetime
 from uuid import UUID
 
 from sqlmodel import SQLModel
 
+from quiz_shared.schemas import AttemptRead
+
+__all__ = ["AttemptStart", "AttemptRead", "AttemptFinish", "AttemptResult"]
+
 
 class AttemptStart(SQLModel):
     quiz_id: UUID
-
-
-class AttemptRead(SQLModel):
-    id: UUID
-    quiz_id: UUID
-    user_id: UUID
-    started_at: datetime
-    finished_at: datetime | None = None
-    score: float | None = None
-    max_score: float
 
 
 class AttemptFinish(SQLModel):

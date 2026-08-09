@@ -1,30 +1,14 @@
-"""Auth and attempt models matching backend Token/UserRead/AttemptRead."""
+"""Auth and attempt models: re-exports the shared read-schemas.
+
+See ``quiz_shared.schemas`` for the field lists (``TokenRead``, ``UserRead``,
+``AttemptRead``).
+"""
 
 from __future__ import annotations
 
-from pydantic import BaseModel
+from quiz_shared.schemas import AttemptRead as Attempt
+from quiz_shared.schemas import AttemptRead as AttemptResult
+from quiz_shared.schemas import TokenRead as Token
+from quiz_shared.schemas import UserRead as User
 
-
-class Token(BaseModel):
-    access_token: str
-    token_type: str = "bearer"
-
-
-class User(BaseModel):
-    id: str
-    email: str
-    level: str | None = None
-
-
-class Attempt(BaseModel):
-    id: str
-    quiz_id: str
-    user_id: str
-    started_at: str | None = None
-    finished_at: str | None = None
-    score: float | None = None
-    max_score: float = 0.0
-
-
-class AttemptResult(Attempt):
-    """Alias used by results; structurally identical to Attempt."""
+__all__ = ["Token", "User", "Attempt", "AttemptResult"]

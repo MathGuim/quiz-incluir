@@ -1,7 +1,8 @@
 """Typed HTTP client for the Quiz backend API.
 
 Methods return pydantic models (parsed from the JSON responses) instead of
-raw dicts, so the rest of the app never touches dictionaries.
+raw dicts, so the rest of the app never touches dictionaries. Fully async so
+network calls don't block the Flet UI event loop.
 """
 
 from __future__ import annotations
@@ -20,10 +21,10 @@ from services.exceptions import QuizApiError
 class QuizApiClient:
     def __init__(self, base_url: str | None = None, timeout: float = API_TIMEOUT):
         self.base_url = (base_url or API_URL).rstrip("/")
-        self._client = httpx.Client(timeout=timeout)
+        self._client = httpx.AsyncClient(timeout=timeout)
 
-    def close(self) -> None:
-        self._client.close()
+    async def aclose(self) -> None:
+        await self._client.aclose()
 
     @staticmethod
     def _headers(token: str | None = None) -> dict:
@@ -47,32 +48,32 @@ class QuizApiClient:
 
     # ---------- auth ----------
 
-    def login(self, email: str, password: str = "") -> Token:
+    async def login(self, email: str, password: str = "") -> Token:
         # The dev token endpoint ignores the password but requires a non-empty
         # form field, so fall back to a placeholder when none is given.
         password = password if password else "stone-quiz"
-        resp = self._client.post(
+        resp = await self._client.post(
             f"{self.base_url}/api/v1/auth/token",
             data={"username": email, "password": password},
         )
         return Token.model_validate(self._handle(resp))
 
-    def me(self, token: str) -> User:
-        resp = self._client.get(
+    async def me(self, token: str) -> User:
+        resp = await self._client.get(
             f"{self.base_url}/api/v1/users/me", headers=self._headers(token)
         )
         return User.model_validate(self._handle(resp))
 
     # ---------- quizzes / questions ----------
 
-    def list_quizzes(self, token: str) -> list[Quiz]:
-        resp = self._client.get(
+    async def list_quizzes(self, token: str) -> list[Quiz]:
+        resp = await self._client.get(
             f"{self.base_url}/api/v1/quizzes", headers=self._headers(token)
         )
         return [Quiz.model_validate(item) for item in self._handle(resp)]
 
-    def get_question(self, token: str, question_id: str) -> Question:
-        resp = self._client.get(
+    async def get_question(self, token: str, question_id: str) -> Question:
+        resp = await self._client.get(
             f"{self.base_url}/api/v1/questions/{question_id}",
             headers=self._headers(token),
         )
@@ -80,27 +81,41 @@ class QuizApiClient:
 
     # ---------- attempts ----------
 
-    def start_attempt(self, token: str, quiz_id: str) -> Attempt:
-        resp = self._client.post(
+    async def start_attempt(self, token: str, quiz_id: str) -> Attempt:
+        resp = await self._client.post(
             f"{self.base_url}/api/v1/attempts",
             headers=self._headers(token),
-            json={"quiz_id": quiz_id},
+            json={"quiz_id": str(quiz_id)},
         )
         return Attempt.model_validate(self._handle(resp))
 
-    def submit_answer(
+    async def submit_answer(
         self, token: str, attempt_id: str, question_id: str, response: dict
     ) -> AnswerRead:
-        resp = self._client.post(
+        resp = await self._client.post(
             f"{self.base_url}/api/v1/attempts/{attempt_id}/answers",
             headers=self._headers(token),
-            json={"question_id": question_id, "response": response},
+            json={"question_id": str(question_id), "response": response},
         )
         return AnswerRead.model_validate(self._handle(resp))
 
-    def finish_attempt(self, token: str, attempt_id: str) -> AttemptResult:
-        resp = self._client.post(
+    async def finish_attempt(self, token: str, attempt_id: str) -> AttemptResult:
+        resp = await self._client.post(
             f"{self.base_url}/api/v1/attempts/{attempt_id}/finish",
             headers=self._headers(token),
         )
         return AttemptResult.model_validate(self._handle(resp))
+
+    async def download_report_pdf(self, token: str, attempt_id: str) -> bytes:
+        resp = await self._client.get(
+            f"{self.base_url}/api/v1/attempts/{attempt_id}/report.pdf",
+            headers=self._headers(token),
+        )
+        if resp.status_code >= 400:
+            detail = resp.text
+            try:
+                detail = resp.json().get("detail", detail)
+            except Exception:
+                pass
+            raise QuizApiError(resp.status_code, detail)
+        return resp.content

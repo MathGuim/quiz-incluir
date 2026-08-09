@@ -19,7 +19,7 @@ def LoginScreen(auth: AuthController):
     error, set_error = use_state("")
     loading, set_loading = use_state(False)
 
-    def on_login(e):
+    async def on_login(e):
         value = (email or "").strip().lower()
 
         if not EMAIL_RE.match(value):
@@ -30,7 +30,7 @@ def LoginScreen(auth: AuthController):
         set_error("")
 
         try:
-            auth.login(value, password or "")
+            await auth.login(value, password or "")
             ft.context.page.navigate("/quizzes")
         except Exception as ex:
             set_error(str(ex))

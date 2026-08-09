@@ -2,11 +2,13 @@ from uuid import UUID
 
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 from sqlmodel import select
 
 from app.core.grading import grade_question
+from app.core.pdf_report import ReportRow
 from app.crud.base import CRUDBase
-from app.models import Answer, Question, Quiz, QuizAttempt, User
+from app.models import Answer, Question, Quiz, QuizAttempt, QuizQuestion, User
 from app.schemas.answer import AnswerSubmit
 from app.schemas.attempt import AttemptStart
 
@@ -101,6 +103,35 @@ class CRUDAttempt(CRUDBase[QuizAttempt, AttemptStart, None]):
             select(Answer).where(Answer.attempt_id == attempt_id)
         )
         return list(result.all())
+
+    async def get_report_rows(
+        self, db: AsyncSession, attempt: QuizAttempt
+    ) -> tuple[Quiz, list[ReportRow]]:
+        quiz = await db.get(Quiz, attempt.quiz_id, options=[selectinload(Quiz.media)])
+
+        result = await db.exec(
+            select(Question)
+            .join(QuizQuestion, QuizQuestion.question_id == Question.id)
+            .where(QuizQuestion.quiz_id == attempt.quiz_id)
+            .options(selectinload(Question.media))
+            .order_by(QuizQuestion.position)
+        )
+        questions = list(result.all())
+
+        answers_by_question = {
+            answer.question_id: answer
+            for answer in await self.get_answers(db, attempt.id)
+        }
+
+        rows = [
+            ReportRow(
+                question=question,
+                media=list(question.media),
+                answer=answers_by_question.get(question.id),
+            )
+            for question in questions
+        ]
+        return quiz, rows
 
 
 attempt = CRUDAttempt(QuizAttempt)
