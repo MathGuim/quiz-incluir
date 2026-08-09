@@ -22,16 +22,52 @@ class AnswerWidget:
         raise NotImplementedError
 
 
+def _option_row(input_control: ft.Control, text: str, on_click) -> ft.Row:
+    """A radio/checkbox + its label as a wrapping ``Text``.
+
+    Flet's built-in ``Radio``/``Checkbox`` ``label=`` text does not wrap
+    within the control's own width, so long options got cut off on narrow
+    screens. Rendering the label as a separate ``Text`` inside an
+    ``expand=True`` container gives it a bounded width to wrap against.
+    The input control and the clickable text are siblings (not nested), so
+    a tap on either fires exactly one handler — no double-toggle risk.
+    """
+    return ft.Row(
+        [
+            input_control,
+            ft.Container(
+                expand=True,
+                ink=True,
+                border_radius=theme.INPUT_RADIUS,
+                padding=ft.Padding(left=4, top=6, right=4, bottom=6),
+                on_click=on_click,
+                content=ft.Text(text),
+            ),
+        ],
+        vertical_alignment=ft.CrossAxisAlignment.CENTER,
+    )
+
+
 class MultipleChoice(AnswerWidget):
     def __init__(self, options: list[str]):
         self.options = options
 
     def build(self, previous: dict | None) -> ft.Control:
-        group = ft.RadioGroup(
-            content=ft.Column(
-                [ft.Radio(value=opt, label=opt, expand=True) for opt in self.options],
-                spacing=4,
-            )
+        group = ft.RadioGroup(content=ft.Column())
+
+        def select(opt: str):
+            def handler(e):
+                group.value = opt
+                group.update()
+
+            return handler
+
+        group.content = ft.Column(
+            [
+                _option_row(ft.Radio(value=opt), opt, select(opt))
+                for opt in self.options
+            ],
+            spacing=4,
         )
         if previous and previous.get("selected"):
             group.value = previous["selected"]
@@ -49,18 +85,29 @@ class MultiSelect(AnswerWidget):
         self.options = options
 
     def build(self, previous: dict | None) -> ft.Control:
-        checkboxes = [ft.Checkbox(label=opt, expand=True) for opt in self.options]
-        if previous:
-            selected = previous.get("selected") or []
-            for cb in checkboxes:
-                cb.value = cb.label in selected
-        column = ft.Column(controls=checkboxes, spacing=4)
+        selected_prev = set((previous or {}).get("selected") or [])
+        checkboxes = [
+            ft.Checkbox(value=opt in selected_prev, data=opt) for opt in self.options
+        ]
+
+        def toggle(cb: ft.Checkbox):
+            def handler(e):
+                cb.value = not cb.value
+                cb.update()
+
+            return handler
+
+        rows = [
+            _option_row(cb, opt, toggle(cb))
+            for cb, opt in zip(checkboxes, self.options)
+        ]
+        column = ft.Column(rows, spacing=4)
         column.data = checkboxes
         self.control = column
         return column
 
     def extract(self) -> dict | None:
-        selected = [cb.label for cb in self.control.data if cb.value]
+        selected = [cb.data for cb in self.control.data if cb.value]
         if selected:
             return {"selected": selected}
         return None
