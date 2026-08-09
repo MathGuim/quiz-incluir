@@ -29,7 +29,7 @@ class MultipleChoice(AnswerWidget):
     def build(self, previous: dict | None) -> ft.Control:
         group = ft.RadioGroup(
             content=ft.Column(
-                [ft.Radio(value=opt, label=opt) for opt in self.options],
+                [ft.Radio(value=opt, label=opt, expand=True) for opt in self.options],
                 spacing=4,
             )
         )
@@ -49,7 +49,7 @@ class MultiSelect(AnswerWidget):
         self.options = options
 
     def build(self, previous: dict | None) -> ft.Control:
-        checkboxes = [ft.Checkbox(label=opt) for opt in self.options]
+        checkboxes = [ft.Checkbox(label=opt, expand=True) for opt in self.options]
         if previous:
             selected = previous.get("selected") or []
             for cb in checkboxes:
