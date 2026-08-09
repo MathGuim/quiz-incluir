@@ -47,11 +47,11 @@ def QuestionScreen(state: AppState, controller: QuizController):
     }
 
     async def on_back(e):
-        await stop_audio()
+        await stop_audio(ft.context.page)
         controller.previous()
 
     async def on_submit(e):
-        await stop_audio()
+        await stop_audio(ft.context.page)
         response = widget.extract()
         if response is None:
             notify("Please answer the question first.", error=True)
