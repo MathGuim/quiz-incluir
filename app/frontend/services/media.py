@@ -5,10 +5,10 @@ and registered into ``page.services`` *before* the page is built/rendered.
 flet binds a client-side invoke-method listener for a service when it is
 added to the page — registering late/after page open (or without a ``src``)
 is what caused ``Timeout waiting for invoke method listener`` errors (see the
-flet 0.86.4 changelog). The instance is stored on ``page.data`` (a strong,
-per-page reference — flet drops weakly-referenced services from the
-registry) rather than a module-level global: a module global is shared by
-every connected browser session in the same server process, which caused
+flet 0.86.4 changelog). The instance is stored via ``services.page_store``
+(a strong, per-page reference — flet drops weakly-referenced services from
+the registry) rather than a module-level global: a module global is shared
+by every connected browser session in the same server process, which caused
 audio started on one client's page to actually play back on a different
 client's page.
 """
@@ -20,6 +20,8 @@ import urllib.parse
 
 import flet as ft
 from flet_audio import Audio
+
+from services.page_store import get_or_create
 
 # A valid placeholder source, so the service satisfies the "src must be a
 # string" contract at construction. It is replaced with a real URL whenever a
@@ -51,10 +53,7 @@ def register_audio(page: ft.Page, src: str = PLACEHOLDER_SRC) -> Audio:
     Call this before the page is rendered so the web client binds the
     invoke-method handler for the audio service. Idempotent per page.
     """
-    audio = page.data
-    if audio is None:
-        audio = Audio(src=src, volume=1.0)
-        page.data = audio
+    audio = get_or_create(page, "audio", lambda: Audio(src=src, volume=1.0))
     if audio not in page.services:
         page.services.append(audio)
     return audio
@@ -76,7 +75,7 @@ def set_audio_src(page: ft.Page, resolved_url: str) -> Audio:
 
 async def stop_audio(page: ft.Page) -> None:
     """Pause this page's audio when leaving a question (Play can resume it)."""
-    audio = page.data
+    audio = (page.data or {}).get("audio")
     if audio is not None:
         try:
             await audio.pause()

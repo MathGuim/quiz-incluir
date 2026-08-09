@@ -6,24 +6,28 @@ results-screen download button) rather than eagerly at startup like
 page has been open and interacted with for a while, so there's no "before the
 page is built" timing window to protect here, and eagerly registering a
 second service alongside Audio at startup is an avoidable risk to Audio's own
-timing-sensitive binding for a feature that isn't needed yet. A module-level
-strong reference keeps it alive across re-renders once registered.
+timing-sensitive binding for a feature that isn't needed yet. The instance is
+stored via ``services.page_store`` (a strong, per-page reference) rather than
+a module-level global: a module global is shared by every connected browser
+session in the same server process — the same bug class that made audio
+started on one client's page play back on a different client's page (see
+``services/media.py``) also meant the PDF "Save As" dialog could be wired to
+a different, unrelated session's page instead of the one that clicked
+Download.
 """
 
 from __future__ import annotations
 
 import flet as ft
 
-_file_picker: ft.FilePicker | None = None
+from services.page_store import get_or_create
 
 
 def register_file_picker(page: ft.Page) -> ft.FilePicker:
-    global _file_picker
-    if _file_picker is None:
-        _file_picker = ft.FilePicker()
-    if _file_picker not in page.services:
-        page.services.append(_file_picker)
-    return _file_picker
+    picker = get_or_create(page, "file_picker", ft.FilePicker)
+    if picker not in page.services:
+        page.services.append(picker)
+    return picker
 
 
 def ensure_file_picker(page: ft.Page) -> ft.FilePicker:
