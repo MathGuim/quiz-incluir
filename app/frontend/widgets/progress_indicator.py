@@ -35,4 +35,10 @@ def build_progress(indices: int, answers: dict | set, current: int) -> ft.Contro
                 ),
             )
         )
-    return ft.Row(dots, alignment=ft.MainAxisAlignment.CENTER, spacing=theme.SPACING_MD)
+    return ft.Row(
+        dots,
+        alignment=ft.MainAxisAlignment.CENTER,
+        spacing=theme.SPACING_MD,
+        wrap=True,
+        run_spacing=theme.SPACING_MD,
+    )

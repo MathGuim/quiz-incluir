@@ -22,28 +22,26 @@ class AnswerWidget:
         raise NotImplementedError
 
 
-def _option_row(input_control: ft.Control, text: str, on_click) -> ft.Row:
-    """A radio/checkbox + its label as a wrapping ``Text``.
+def _option_row(input_control: ft.Control, text: str) -> ft.Row:
+    """A radio/checkbox with its label rendered as a separate wrapping ``Text``.
 
     Flet's built-in ``Radio``/``Checkbox`` ``label=`` text does not wrap
     within the control's own width, so long options got cut off on narrow
-    screens. Rendering the label as a separate ``Text`` inside an
+    screens. Rendering the label as a plain ``Text`` inside an
     ``expand=True`` container gives it a bounded width to wrap against.
-    The input control and the clickable text are siblings (not nested), so
-    a tap on either fires exactly one handler — no double-toggle risk.
+
+    The tap target stays the radio/checkbox itself (its native, purely
+    client-side click handling — no Python round trip). A component's
+    entire returned control tree is marked frozen by flet as soon as it
+    renders (see ``flet/components/component.py``), so any handler here
+    that mutated a captured control and called ``.update()`` on it would
+    work only until the next re-render, then raise "Frozen control cannot
+    be updated." — which is exactly what an earlier version of this file
+    did for a "tap anywhere on the row" affordance. Not worth the
+    reliability cost for a slightly bigger tap target.
     """
     return ft.Row(
-        [
-            input_control,
-            ft.Container(
-                expand=True,
-                ink=True,
-                border_radius=theme.INPUT_RADIUS,
-                padding=ft.Padding(left=4, top=6, right=4, bottom=6),
-                on_click=on_click,
-                content=ft.Text(text),
-            ),
-        ],
+        [input_control, ft.Container(expand=True, content=ft.Text(text))],
         vertical_alignment=ft.CrossAxisAlignment.CENTER,
     )
 
@@ -53,21 +51,11 @@ class MultipleChoice(AnswerWidget):
         self.options = options
 
     def build(self, previous: dict | None) -> ft.Control:
-        group = ft.RadioGroup(content=ft.Column())
-
-        def select(opt: str):
-            def handler(e):
-                group.value = opt
-                group.update()
-
-            return handler
-
-        group.content = ft.Column(
-            [
-                _option_row(ft.Radio(value=opt), opt, select(opt))
-                for opt in self.options
-            ],
-            spacing=4,
+        group = ft.RadioGroup(
+            content=ft.Column(
+                [_option_row(ft.Radio(value=opt), opt) for opt in self.options],
+                spacing=4,
+            )
         )
         if previous and previous.get("selected"):
             group.value = previous["selected"]
@@ -89,19 +77,10 @@ class MultiSelect(AnswerWidget):
         checkboxes = [
             ft.Checkbox(value=opt in selected_prev, data=opt) for opt in self.options
         ]
-
-        def toggle(cb: ft.Checkbox):
-            def handler(e):
-                cb.value = not cb.value
-                cb.update()
-
-            return handler
-
-        rows = [
-            _option_row(cb, opt, toggle(cb))
-            for cb, opt in zip(checkboxes, self.options)
-        ]
-        column = ft.Column(rows, spacing=4)
+        column = ft.Column(
+            [_option_row(cb, opt) for cb, opt in zip(checkboxes, self.options)],
+            spacing=4,
+        )
         column.data = checkboxes
         self.control = column
         return column
