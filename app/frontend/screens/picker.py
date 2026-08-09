@@ -57,7 +57,7 @@ def QuizPickerScreen(state: AppState, controller: QuizController):
         gradient=ft.LinearGradient(
             begin=ft.Alignment.TOP_LEFT,
             end=ft.Alignment.BOTTOM_RIGHT,
-            colors=["#6C63FF", "#8B7BFF"],
+            colors=theme.PRIMARY_GRADIENT,
         ),
         content=ft.Column(
             [
@@ -85,10 +85,10 @@ def QuizPickerScreen(state: AppState, controller: QuizController):
     search = ft.TextField(
         hint_text="Search quizzes",
         prefix_icon=ft.Icons.SEARCH,
-        border_radius=16,
-        filled=True,
-        bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST,
-        border_color=ft.Colors.TRANSPARENT,
+        border_radius=theme.INPUT_RADIUS,
+        border_color=theme.BORDER,
+        focused_border_color=theme.PRIMARY,
+        bgcolor=theme.SURFACE,
         value=query,
         on_change=lambda e: set_query(e.control.value),
     )
@@ -99,12 +99,13 @@ def QuizPickerScreen(state: AppState, controller: QuizController):
         async def on_card_click(e, q=quiz):
             await start(q)
 
-        return ft.Card(
-            elevation=2,
-            margin=0,
+        return ft.Container(
+            border_radius=theme.CARD_RADIUS,
+            bgcolor=theme.SURFACE,
+            border=ft.Border.all(1, theme.BORDER),
             content=ft.Container(
                 padding=20,
-                border_radius=20,
+                border_radius=theme.CARD_RADIUS,
                 ink=True,
                 on_click=on_card_click,
                 animate=ft.Animation(250, ft.AnimationCurve.EASE_OUT),
@@ -132,6 +133,8 @@ def QuizPickerScreen(state: AppState, controller: QuizController):
                                             size=20,
                                             weight=ft.FontWeight.BOLD,
                                             expand=True,
+                                            max_lines=1,
+                                            overflow=ft.TextOverflow.ELLIPSIS,
                                         ),
                                         ft.Icon(
                                             ft.Icons.CHEVRON_RIGHT_ROUNDED,
@@ -139,11 +142,16 @@ def QuizPickerScreen(state: AppState, controller: QuizController):
                                         ),
                                     ]
                                 ),
-                                ft.Text(
-                                    quiz.description
-                                    or "Practice vocabulary and grammar.",
-                                    size=14,
-                                    color=theme.MUTED_700,
+                                ft.Container(
+                                    height=40,
+                                    content=ft.Text(
+                                        quiz.description
+                                        or "Practice vocabulary and grammar.",
+                                        size=14,
+                                        color=theme.MUTED_700,
+                                        max_lines=2,
+                                        overflow=ft.TextOverflow.ELLIPSIS,
+                                    ),
                                 ),
                                 ft.Container(
                                     margin=ft.Margin(top=8),
@@ -153,20 +161,20 @@ def QuizPickerScreen(state: AppState, controller: QuizController):
                                         right=10,
                                         bottom=6,
                                     ),
-                                    bgcolor="#EEF2FF",
-                                    border_radius=20,
+                                    bgcolor=theme.PRIMARY_LIGHT,
+                                    border_radius=theme.PILL_RADIUS,
                                     content=ft.Row(
                                         [
                                             ft.Icon(
                                                 ft.Icons.HELP_OUTLINE,
                                                 size=14,
-                                                color="#6C63FF",
+                                                color=theme.PRIMARY_DARK,
                                             ),
                                             ft.Text(
                                                 f"{len(quiz.question_ids)} Questions",
                                                 size=12,
                                                 weight=ft.FontWeight.W_500,
-                                                color="#6C63FF",
+                                                color=theme.PRIMARY_DARK,
                                             ),
                                         ],
                                         tight=True,
@@ -182,6 +190,19 @@ def QuizPickerScreen(state: AppState, controller: QuizController):
                     vertical_alignment=ft.CrossAxisAlignment.CENTER,
                 ),
             ),
+        )
+
+    def _quiz_grid(items):
+        if len(items) <= 1:
+            col = {"xs": 12}
+        else:
+            col = {"xs": 12, "sm": 12, "md": 6, "lg": 6, "xl": 4}
+        return ft.ResponsiveRow(
+            controls=[
+                ft.Container(col=col, content=_quiz_card(q)) for q in items
+            ],
+            spacing=20,
+            run_spacing=20,
         )
 
     if loading:
@@ -292,7 +313,7 @@ def QuizPickerScreen(state: AppState, controller: QuizController):
                 sections.append(
                     ft.Text(title, size=22, weight=ft.FontWeight.BOLD)
                 )
-                sections.extend(_quiz_card(q) for q in items)
+                sections.append(_quiz_grid(items))
             content = ft.Column(sections, spacing=20)
 
         body = ft.Container(
@@ -311,14 +332,15 @@ def QuizPickerScreen(state: AppState, controller: QuizController):
 
     return ft.View(
         route="/quizzes",
-        bgcolor=ft.Colors.SURFACE,
+        bgcolor=theme.BACKGROUND,
         appbar=ft.AppBar(
-            bgcolor=ft.Colors.TRANSPARENT,
+            bgcolor=theme.SURFACE,
             elevation=0,
             center_title=False,
             title=ft.Text(
                 APP_TITLE,
                 weight=ft.FontWeight.BOLD,
+                color=theme.TEXT_PRIMARY,
             ),
             actions=[
                 ft.Container(
@@ -326,7 +348,7 @@ def QuizPickerScreen(state: AppState, controller: QuizController):
                     padding=ft.Padding(right=12),
                     content=ft.CircleAvatar(
                         radius=18,
-                        bgcolor="#6C63FF",
+                        bgcolor=theme.PRIMARY,
                         content=ft.Text(
                             state.email[:1].upper(),
                             color=ft.Colors.WHITE,
@@ -336,5 +358,11 @@ def QuizPickerScreen(state: AppState, controller: QuizController):
                 )
             ],
         ),
-        controls=[body],
+        controls=[
+            theme.responsive(
+                body,
+                expand=True,
+                col={"xs": 12, "sm": 12, "md": 11, "lg": 10, "xl": 9},
+            )
+        ],
     )

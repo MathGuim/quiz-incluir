@@ -11,15 +11,18 @@ import theme
 
 
 def question_card(question: Question) -> ft.Control:
-    return ft.Card(
-        content=ft.Container(
-            padding=20,
-            content=ft.Column(
-                [
-                    ft.Text(question.prompt, size=18, weight=ft.FontWeight.BOLD),
-                    *media_area(question.media, config.API_URL),
-                ],
-                spacing=theme.SPACING_LG,
-            ),
-        )
+    return theme.card(
+        padding=20,
+        content=ft.Column(
+            [
+                ft.Text(
+                    question.prompt,
+                    size=18,
+                    weight=ft.FontWeight.BOLD,
+                    color=theme.TEXT_PRIMARY,
+                ),
+                *media_area(question.media, config.API_URL),
+            ],
+            spacing=theme.SPACING_LG,
+        ),
     )

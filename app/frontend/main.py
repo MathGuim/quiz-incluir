@@ -5,6 +5,7 @@ from __future__ import annotations
 import flet as ft
 
 import config
+import theme
 from controllers.auth_controller import AuthController
 from controllers.quiz_controller import QuizController
 from router import make_app
@@ -25,14 +26,12 @@ def main(page: ft.Page) -> None:
     # registers FilePicker lazily on its first actual use instead.
     register_audio(page)
     page.theme_mode = ft.ThemeMode.LIGHT
-    page.padding = 24
+    page.theme = theme.page_theme()
+    page.bgcolor = theme.BACKGROUND
+    # Padding/max-width are handled per-screen via theme.responsive() so the
+    # app is full-width on mobile and a centered column on desktop.
+    page.padding = 0
     page.appbar = ft.AppBar(title=ft.Text(config.APP_TITLE), center_title=True)
-
-    try:
-        page.window.width = 520
-        page.window.height = 820
-    except Exception:
-        pass
 
     state = AppState()
     api = QuizApiClient(config.API_URL)

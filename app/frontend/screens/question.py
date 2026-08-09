@@ -24,8 +24,14 @@ def QuestionScreen(state: AppState, controller: QuizController):
     if question is None:
         return ft.View(
             route="/quiz",
-            appbar=ft.AppBar(title=ft.Text(APP_TITLE), center_title=True),
-            controls=[ft.Text("No question to display.")],
+            bgcolor=theme.BACKGROUND,
+            appbar=ft.AppBar(
+                bgcolor=theme.SURFACE,
+                elevation=0,
+                title=ft.Text(APP_TITLE, color=theme.TEXT_PRIMARY),
+                center_title=True,
+            ),
+            controls=[ft.Text("No question to display.", color=theme.TEXT_SECONDARY)],
         )
 
     idx = state.current_index
@@ -74,27 +80,45 @@ def QuestionScreen(state: AppState, controller: QuizController):
 
     quiz_media = state.quiz.media if state.quiz else []
 
-    body = ft.Column(
-        [
-            build_progress(total, answered_indices, idx),
-            ft.Container(height=12),
-            # Shared context for the whole quiz (e.g. the reading passage or
-            # listening audio) — a persistent header shown on every question,
-            # not just the first, so it stays available for reference.
-            *media_area(quiz_media, config.API_URL),
-            question_card(question),
-            ft.Container(height=8),
-            widget.control,
-            ft.Row([back_btn, next_btn], spacing=theme.SPACING_LG),
-        ],
+    body = ft.Container(
+        padding=20,
         expand=True,
-        scroll=ft.ScrollMode.AUTO,
+        content=ft.Column(
+            [
+                build_progress(total, answered_indices, idx),
+                ft.Container(height=12),
+                # Shared context for the whole quiz (e.g. the reading passage or
+                # listening audio) — a persistent header shown on every question,
+                # not just the first, so it stays available for reference.
+                *media_area(quiz_media, config.API_URL),
+                question_card(question),
+                ft.Container(height=8),
+                widget.control,
+                ft.Row([back_btn, next_btn], spacing=theme.SPACING_LG),
+            ],
+            expand=True,
+            scroll=ft.ScrollMode.AUTO,
+        ),
     )
 
     return ft.View(
         route=f"/quiz/{idx}",
+        bgcolor=theme.BACKGROUND,
         appbar=ft.AppBar(
-            title=ft.Text(f"Question {idx + 1} of {total}"), center_title=True
+            bgcolor=theme.SURFACE,
+            elevation=0,
+            title=ft.Text(
+                f"Question {idx + 1} of {total}",
+                weight=ft.FontWeight.BOLD,
+                color=theme.TEXT_PRIMARY,
+            ),
+            center_title=True,
         ),
-        controls=[body],
+        controls=[
+            theme.responsive(
+                body,
+                expand=True,
+                col={"xs": 12, "sm": 12, "md": 10, "lg": 9, "xl": 8},
+            )
+        ],
     )

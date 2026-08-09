@@ -163,7 +163,8 @@ def _build_media(media: Media, base_url: str) -> list[ft.Control]:
         content=ft.Column(widgets, spacing=theme.SPACING_SM),
         padding=8,
         border_radius=theme.CARD_RADIUS,
-        bgcolor=ft.Colors.with_opacity(0.05, ft.Colors.BLUE_GREY_100),
+        bgcolor=theme.BACKGROUND,
+        border=ft.Border.all(1, theme.BORDER),
     )
     return [wrapped]
 

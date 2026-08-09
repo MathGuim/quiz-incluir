@@ -29,50 +29,73 @@ def ResultsScreen(state: AppState, controller: QuizController):
         except Exception as ex:
             notify(f"Could not download report: {ex}", error=True)
 
-    body = ft.Column(
-        [
-            ft.Container(height=12),
-            ft.Icon(
-                ft.Icons.EMOJI_EVENTS if passed else ft.Icons.SENTIMENT_NEUTRAL,
-                size=64,
-                color=ft.Colors.AMBER_600 if passed else ft.Colors.GREY_500,
-            ),
-            ft.Text(
-                "Quiz completed!",
-                size=26,
-                weight=ft.FontWeight.BOLD,
-                text_align=ft.TextAlign.CENTER,
-            ),
-            ft.Container(height=8),
-            ft.Text(
-                f"{score:g} / {max_score:g}",
-                size=44,
-                weight=ft.FontWeight.BOLD,
-                color=theme.PRIMARY,
-                text_align=ft.TextAlign.CENTER,
-            ),
-            ft.Text(
-                f"{pct}% correct",
-                size=16,
-                color=theme.MUTED_700,
-                text_align=ft.TextAlign.CENTER,
-            ),
-            ft.Container(height=24),
-            ft.FilledButton("Take another quiz", on_click=again, expand=True),
-            ft.Container(height=8),
-            ft.OutlinedButton(
-                "Download PDF",
-                icon=ft.Icons.PICTURE_AS_PDF,
-                on_click=download_pdf,
-                expand=True,
-            ),
-        ],
-        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-        expand=True,
+    body = theme.card(
+        padding=32,
+        content=ft.Column(
+            [
+                ft.Icon(
+                    ft.Icons.EMOJI_EVENTS if passed else ft.Icons.SENTIMENT_NEUTRAL,
+                    size=64,
+                    color=theme.PRIMARY if passed else theme.TEXT_SECONDARY,
+                ),
+                ft.Text(
+                    "Quiz completed!",
+                    size=26,
+                    weight=ft.FontWeight.BOLD,
+                    color=theme.TEXT_PRIMARY,
+                    text_align=ft.TextAlign.CENTER,
+                ),
+                ft.Container(height=8),
+                ft.Text(
+                    f"{score:g} / {max_score:g}",
+                    size=44,
+                    weight=ft.FontWeight.BOLD,
+                    color=theme.PRIMARY,
+                    text_align=ft.TextAlign.CENTER,
+                ),
+                ft.Text(
+                    f"{pct}% correct",
+                    size=16,
+                    color=theme.MUTED_700,
+                    text_align=ft.TextAlign.CENTER,
+                ),
+                ft.Container(height=24),
+                ft.Row(
+                    [
+                        ft.FilledButton(
+                            "Take another quiz", on_click=again, expand=True
+                        ),
+                        ft.OutlinedButton(
+                            "Download PDF",
+                            icon=ft.Icons.PICTURE_AS_PDF,
+                            on_click=download_pdf,
+                            expand=True,
+                        ),
+                    ],
+                    spacing=theme.SPACING_LG,
+                ),
+            ],
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+        ),
     )
 
     return ft.View(
         route="/results",
-        appbar=ft.AppBar(title=ft.Text("Results"), center_title=True),
-        controls=[body],
+        bgcolor=theme.BACKGROUND,
+        appbar=ft.AppBar(
+            bgcolor=theme.SURFACE,
+            elevation=0,
+            title=ft.Text("Results", weight=ft.FontWeight.BOLD, color=theme.TEXT_PRIMARY),
+            center_title=True,
+        ),
+        controls=[
+            ft.Container(
+                expand=True,
+                padding=24,
+                alignment=ft.Alignment(0, 0),
+                content=theme.responsive(
+                    body, col={"xs": 12, "sm": 9, "md": 6, "lg": 4, "xl": 3}
+                ),
+            )
+        ],
     )

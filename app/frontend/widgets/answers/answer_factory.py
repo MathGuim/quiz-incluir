@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import flet as ft
 
+import theme
 from models.question import Question, QuestionType
 
 
@@ -107,7 +108,7 @@ class ShortText(AnswerWidget):
 class Unsupported(AnswerWidget):
     def build(self, previous: dict | None) -> ft.Control:
         self.control = ft.Text(
-            "Unsupported question type.", color=ft.Colors.RED_400
+            "Unsupported question type.", color=theme.ERROR
         )
         return self.control
 

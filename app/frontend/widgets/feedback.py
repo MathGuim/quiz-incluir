@@ -9,7 +9,7 @@ import theme
 
 def notify(message: str, error: bool = False) -> None:
     """Show a snackbar. Appends to the overlay with ``open=True`` (no Page.open)."""
-    color = theme.ERROR if error else ft.Colors.GREEN_400
+    color = theme.ERROR if error else theme.SUCCESS
     snack = ft.SnackBar(
         ft.Text(message, color=ft.Colors.WHITE),
         bgcolor=color,

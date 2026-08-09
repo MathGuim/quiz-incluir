@@ -8,7 +8,7 @@ import theme
 
 
 def build_progress(indices: int, answers: dict | set, current: int) -> ft.Control:
-    """Render one dot per question: green answered, blue current, grey pending."""
+    """Render one dot per question: green answered, orange current, outlined pending."""
     dots = []
     for i in range(indices):
         done = i < current or i in answers
@@ -16,15 +16,19 @@ def build_progress(indices: int, answers: dict | set, current: int) -> ft.Contro
         background = (
             theme.SUCCESS
             if done and not is_current
-            else (theme.PRIMARY if is_current else ft.Colors.GREY_300)
+            else (theme.PRIMARY if is_current else theme.SURFACE)
         )
-        foreground = ft.Colors.WHITE if done or is_current else ft.Colors.BLACK_54
+        foreground = (
+            ft.Colors.WHITE if done or is_current else theme.TEXT_SECONDARY
+        )
+        border = None if done or is_current else ft.Border.all(1, theme.BORDER)
         dots.append(
             ft.Container(
                 width=30,
                 height=30,
                 border_radius=theme.STEP_RADIUS,
                 bgcolor=background,
+                border=border,
                 alignment=ft.Alignment.CENTER,
                 content=ft.Text(
                     str(i + 1), color=foreground, weight=ft.FontWeight.BOLD
