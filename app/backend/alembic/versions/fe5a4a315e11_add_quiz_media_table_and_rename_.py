@@ -33,12 +33,35 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_quiz_media_quiz_id'), 'quiz_media', ['quiz_id'], unique=False)
 
-    op.execute("ALTER TYPE quizcategory RENAME VALUE 'VOCABULARY' TO 'VOCABULARY_GRAMMAR'")
+    # Guarded: the quizcategory enum is not created anywhere in the migration
+    # chain (revision 9363763904ae creates languagelevel/questiontype/mediatype
+    # only). It exists solely in databases built by SQLModel.create_all, so on a
+    # fresh database this rename would abort the whole upgrade and roll back the
+    # initial schema, leaving the DB empty.
+    op.execute(
+        """
+        DO $$
+        BEGIN
+            IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'quizcategory') THEN
+                ALTER TYPE quizcategory RENAME VALUE 'VOCABULARY' TO 'VOCABULARY_GRAMMAR';
+            END IF;
+        END $$;
+        """
+    )
 
 
 def downgrade() -> None:
     """Downgrade schema."""
-    op.execute("ALTER TYPE quizcategory RENAME VALUE 'VOCABULARY_GRAMMAR' TO 'VOCABULARY'")
+    op.execute(
+        """
+        DO $$
+        BEGIN
+            IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'quizcategory') THEN
+                ALTER TYPE quizcategory RENAME VALUE 'VOCABULARY_GRAMMAR' TO 'VOCABULARY';
+            END IF;
+        END $$;
+        """
+    )
 
     op.drop_index(op.f('ix_quiz_media_quiz_id'), table_name='quiz_media')
     op.drop_table('quiz_media')
