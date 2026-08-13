@@ -1,0 +1,63 @@
+# Production compose for Dokploy — quiz.programaincluir.org
+#
+# Dokploy injects Traefik labels, port mappings, and dokploy-network at deploy
+# time — do NOT add them here. Local dev keeps using compose.yaml (unchanged).
+#
+# Public entrypoint: quiz-incluir-frontend-e17b8a (port 8080).
+# The backend is intentionally NOT publicly exposed — the Flet frontend calls
+# it server-side over the internal Docker network.
+#
+# Required Dokploy-managed env vars (set in the Dokploy environment panel):
+#   QUIZ_DB_PASSWORD  — Postgres password for the dedicated quiz DB
+#   SECRET_KEY        — JWT signing key (generate: openssl rand -hex 32)
+
+services:
+  quiz-incluir-frontend-e17b8a:
+    build:
+      context: .
+      dockerfile: docker/frontend.Dockerfile
+    container_name: quiz-incluir-frontend-e17b8a
+    restart: unless-stopped
+    environment:
+      QUIZ_API_URL: http://quiz-incluir-backend-e17b8a:8000
+      QUIZ_API_TIMEOUT: "15"
+    depends_on:
+      quiz-incluir-backend-e17b8a:
+        condition: service_started
+
+  quiz-incluir-backend-e17b8a:
+    build:
+      context: .
+      dockerfile: docker/backend.Dockerfile
+    container_name: quiz-incluir-backend-e17b8a
+    restart: unless-stopped
+    environment:
+      # config.py's field_validator rewrites postgresql:// to
+      # postgresql+asyncpg:// automatically — plain URL is correct here.
+      DATABASE_URL: postgresql://quiz:${QUIZ_DB_PASSWORD}@quiz-incluir-db-e17b8a:5432/quiz
+      SECRET_KEY: ${SECRET_KEY}
+    depends_on:
+      quiz-incluir-db-e17b8a:
+        condition: service_healthy
+
+  # Dedicated Postgres instance for quiz-incluir ONLY — explicitly not shared
+  # with the existing incluir prod DB (operator requirement, 2026-08-13).
+  # No host port binding on purpose: internal-only access.
+  quiz-incluir-db-e17b8a:
+    image: postgres:16
+    container_name: quiz-incluir-db-e17b8a
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: quiz
+      POSTGRES_PASSWORD: ${QUIZ_DB_PASSWORD}
+      POSTGRES_DB: quiz
+    volumes:
+      - quiz_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U quiz -d quiz"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  quiz_pgdata:
